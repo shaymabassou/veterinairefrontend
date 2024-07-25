@@ -29,7 +29,7 @@ const LoginForm: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: `url('/images/page.PNG')` }}>
-      <div className="absolute w-900 h-800 right-7 transform -translate-x-70 -translate-y-1/9 bg-white bg-opacity-30 backdrop-filter backdrop-blur-xl rounded-lg p-12">
+      <div className="absolute w-900 h-800 right-7 transform -translate-x-70 -translate-y-1/9 bg-white bg-opacity-100 backdrop-filter backdrop-blur-xl rounded-lg p-12">
         <form onSubmit={handleSubmit} className="w-full max-w-sm">
           <h2 className="text-2xl mb-6 text-center">Login</h2>
           <div className="mb-4">
@@ -58,20 +58,20 @@ const LoginForm: React.FC = () => {
           {success && <p className="text-green-500 mb-4">{success}</p>}
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors duration-200"
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-800 transition-colors duration-200"
           >
             Login
           </button>
-          <div className="flex justify-between items-center mt-4">
+          <div className="mt-4 text-center">
             <a href="#" className="text-sm text-blue-500 hover:text-blue-600">
               Forgot Password?
             </a>
-            <div className="text-sm text-gray-700">
-              Don't have an account yet?{' '}
-              <a href="/register" className="text-blue-500 hover:text-blue-600">
-                Register for free
-              </a>
-            </div>
+          </div>
+          <div className="mt-2 text-center text-sm text-gray-700">
+            Don't have an account yet?{' '}
+            <a href="/register" className="text-blue-500 hover:text-blue-600">
+              Register for free
+            </a>
           </div>
         </form>
       </div>

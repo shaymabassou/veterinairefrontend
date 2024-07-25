@@ -1,9 +1,6 @@
 'use client';
 import React from 'react';
 import SideNavbar from '../components/SideNavbar';
-
-
-
 const Dashboard: React.FC = () => {
   return (
     <div className="flex">

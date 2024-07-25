@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
- import MedicamentForm from '../components/MedicamentForm';
+ import MedicamentForm from '../components/Medicament/MedicamentForm';
 
 
 const AddMedicamentPage: React.FC = () => {

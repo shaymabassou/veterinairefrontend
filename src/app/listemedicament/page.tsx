@@ -1,9 +1,10 @@
 'use client';
 import React from 'react';
-import ListMedicamentForm from '../components/ListMedicamentForm';
+import ListMedicamentForm from '../components/Medicament/ListMedicamentForm';
 
 const ListMedicamentPage: React.FC = () => {
   return (
+    
     <div>
       <ListMedicamentForm />
     </div>
