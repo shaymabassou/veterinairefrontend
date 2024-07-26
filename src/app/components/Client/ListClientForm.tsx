@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import SideNavbar from '../SideNavbar';
-import { FaSearch, FaPlus } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { MdPerson } from 'react-icons/md';
 
 interface Client {
@@ -63,6 +63,28 @@ const ListClientForm: React.FC = () => {
     router.push(`/clients/${clientId}`);
   };
 
+  const handleDeleteClient = async (id: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Token non trouvé. Veuillez vous reconnecter.');
+      return;
+    }
+
+    if (window.confirm('Voulez-vous vraiment supprimer ce client ?')) {
+      try {
+        await axios.delete(`http://localhost:3000/users/client/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setClients(clients.filter(client => client._id !== id));
+      } catch (error: any) {
+        setError(`Échec de la suppression du client : ${error.response?.data?.message || error.message}`);
+        console.error('Error deleting client:', error.response?.data || error.message);
+      }
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-white">
       <SideNavbar />
@@ -91,35 +113,46 @@ const ListClientForm: React.FC = () => {
           <table className="min-w-full bg-white border table-auto">
             <thead className="bg-gray-200">
               <tr>
-                <th className="py-2 px-4 border"></th>
-                <th className="py-2 px-4 border">Prénom</th>
-                <th className="py-2 px-4 border">Nom</th>
-                <th className="py-2 px-4 border">Email</th>
-                <th className="py-2 px-4 border">CIN</th>
-                <th className="py-2 px-4 border">Téléphone</th>
-                <th className="py-2 px-4 border">Adresse</th>
-                <th className="py-2 px-4 border">Date de Naissance</th>
-                {/* <th className="py-2 px-4 border">Animal ID</th> */}
+                <th className="px-4 py-2 border">Prénom</th>
+                <th className="px-4 py-2 border">Nom</th>
+                <th className="px-4 py-2 border">Email</th>
+                <th className="px-4 py-2 border">CIN</th>
+                <th className="px-4 py-2 border">Téléphone</th>
+                <th className="px-4 py-2 border">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredClients.map(client => (
-                <tr
-                  key={client._id}
-                  className="cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleClientClick(client._id)}
-                >
-                  <td className="py-2 px-4 border">
-                    <MdPerson className="text-2xl text-gray-500" />
+              {filteredClients.map((client) => (
+                <tr key={client._id} className="hover:bg-gray-100 cursor-pointer">
+                  <td className="px-4 py-2 border flex items-center" onClick={() => handleClientClick(client._id)}>
+                    <MdPerson className="mr-2" /> {client.firstname}
                   </td>
-                  <td className="py-2 px-4 border">{client.firstname}</td>
-                  <td className="py-2 px-4 border">{client.lastname}</td>
-                  <td className="py-2 px-4 border">{client.email}</td>
-                  <td className="py-2 px-4 border">{client.CIN}</td>
-                  <td className="py-2 px-4 border">{client.tel}</td>
-                  <td className="py-2 px-4 border">{client.adresse}</td>
-                  <td className="py-2 px-4 border">{new Date(client.dateNaissance).toLocaleDateString()}</td>
-                  {/* <td className="py-2 px-4 border">{client.animalid}</td> */}
+                  <td className="px-4 py-2 border" onClick={() => handleClientClick(client._id)}>
+                    {client.lastname}
+                  </td>
+                  <td className="px-4 py-2 border">{client.email}</td>
+                  <td className="px-4 py-2 border">{client.CIN}</td>
+                  <td className="px-4 py-2 border">{client.tel}</td>
+                  <td className="px-4 py-2 flex justify-center">
+                    <button
+                      className="text-blue-500 hover:text-blue-700 mr-2"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        router.push(`/updateclient?id=${client._id}`);
+                      }}
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      className="text-red-500 hover:text-red-700"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDeleteClient(client._id);
+                      }}
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

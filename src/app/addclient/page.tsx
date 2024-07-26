@@ -1,14 +1,14 @@
 'use client';
 import React from 'react';
-  import ClientForm from '../components/Client/ClientForm';
+  import ClientAndAnimalForm from '../components/Client/ClientAndAnimalForm';
 
 
-const ClientPage: React.FC = () => {
+const ClientAndAnimalPage: React.FC = () => {
   return (
     <div>
-      <ClientForm />
+      <ClientAndAnimalForm/>
     </div>
   );
 };
 
-export default ClientPage;
+export default ClientAndAnimalPage;
