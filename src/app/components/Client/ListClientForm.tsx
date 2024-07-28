@@ -14,7 +14,7 @@ interface Client {
   tel: string;
   adresse: string;
   dateNaissance: string;
-  animalid: string;
+ 
 }
 
 const ListClientForm: React.FC = () => {
@@ -56,7 +56,7 @@ const ListClientForm: React.FC = () => {
   );
 
   const handleAddClientClick = () => {
-    router.push('/addclient');
+    router.push('/addclientanimal');
   };
 
   const handleClientClick = (clientId: string) => {
@@ -72,7 +72,7 @@ const ListClientForm: React.FC = () => {
 
     if (window.confirm('Voulez-vous vraiment supprimer ce client ?')) {
       try {
-        await axios.delete(`http://localhost:3000/users/client/${id}`, {
+        await axios.delete(`http://localhost:3000/users/clients/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -90,7 +90,7 @@ const ListClientForm: React.FC = () => {
       <SideNavbar />
       <main className="flex-grow p-6 ml-64 bg-white">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold text-gray-600">Liste des Clients</h1>
+          <h1 className="text-2xl font-semibold text-gray-600">Liste des Clients et des animaux</h1>
           <button
             className="w-12 h-12 rounded-md border border-gray-300 text-gray-500 shadow-md hover:bg-gray-100 flex items-center justify-center transition duration-200"
             onClick={handleAddClientClick}
