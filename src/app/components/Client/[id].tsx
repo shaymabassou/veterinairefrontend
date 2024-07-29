@@ -12,7 +12,6 @@ interface Client {
   tel: string;
   adresse: string;
   dateNaissance: string;
-  // animalid: string;
   photoUrl: string; // Ajouter le champ photoUrl
 }
 

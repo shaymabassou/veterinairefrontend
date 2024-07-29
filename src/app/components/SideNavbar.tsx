@@ -4,9 +4,10 @@ import { useRouter } from 'next/navigation';
 import { GiHamburgerMenu, GiDogBowl, GiChickenLeg } from 'react-icons/gi';
 import { Disclosure } from '@headlessui/react';
 import { MdOutlineSpaceDashboard, MdOutlineLogout } from 'react-icons/md';
-import { AiFillMedicineBox, AiOutlineFileText } from 'react-icons/ai';
+import { AiFillMedicineBox, AiOutlineFileText, AiOutlineUser } from 'react-icons/ai';
 import { RiBillLine } from 'react-icons/ri';
 import { BsFillFileTextFill } from 'react-icons/bs';
+import { FaPaw } from 'react-icons/fa';
 
 const SideNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,9 +22,9 @@ const SideNavbar = () => {
     setIsOpen(!isOpen);
   };
 
-  const NavItem = ({ href, icon, label }) => (
+  const NavItem = ({ href, icon, label, onClick }) => (
     <Link href={href} passHref>
-      <div className="flex items-center p-2 rounded-lg text-gray-500 hover:bg-gray-100 cursor-pointer">
+      <div className="flex items-center p-2 rounded-lg text-gray-500 hover:bg-gray-100 cursor-pointer" onClick={onClick}>
         {icon && <div className="text-2xl text-gray-400 mr-3">{icon}</div>}
         <span>{label}</span>
       </div>
@@ -71,10 +72,10 @@ const SideNavbar = () => {
                   <GiHamburgerMenu className={`w-5 h-5 text-gray-400 ${open ? 'transform rotate-90' : ''}`} />
                 </Disclosure.Button>
                 <Disclosure.Panel className="pl-4 space-y-2">
-                  <NavItem href="/listeclient" icon={<BsFillFileTextFill />} label="Clients" />
-                  <NavItem href="/gestion d'animal" icon={<BsFillFileTextFill />} label="Animals" />
-                  <NavItem href="/historique-client" icon={<BsFillFileTextFill />} label="Historique des Clients" />
-                  <NavItem href="/historique-animal" icon={<BsFillFileTextFill />} label="Historique des Animaux" />
+                  <NavItem href="/listeclient" icon={<AiOutlineUser />} label="Clients" />
+                  <NavItem href="/listeanimal" icon={<FaPaw />} label="Animals" />
+                  {/* <NavItem href="/historique-client" icon={<BsFillFileTextFill />} label="Historique des Clients" /> */}
+                  <NavItem href="/addhistoriqueanimal" icon={<BsFillFileTextFill />} label="Historique des Animaux" />
                 </Disclosure.Panel>
               </>
             )}
