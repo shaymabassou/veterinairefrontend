@@ -66,10 +66,10 @@ const HistoriqueAnimalForm: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         }
-      );
+      );  
 
       setSuccess('Historique ajouté avec succès.');
-      router.push('/listehistorique'); // Redirect to the historiques list page after successful addition
+      router.push('/listeanimal'); // Redirect to the historiques list page after successful addition
     } catch (error) {
       setError('Erreur lors de l\'ajout de l\'historique. Veuillez réessayer.');
     }
