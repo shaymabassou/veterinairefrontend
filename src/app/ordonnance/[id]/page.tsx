@@ -1,8 +1,6 @@
 'use client';
+import OrdonnanceDetails from '@/app/components/Ordonnance/[id]';
 import React from 'react';
-import OrdonnanceDetails from '../../components/Ordonnance/[id]';
-
-
 
 
 const OrdonnanceDetailsPage = () => {

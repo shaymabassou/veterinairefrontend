@@ -117,7 +117,7 @@ const HistoriqueAnimalForm: React.FC = () => {
                   <option value="">Sélectionner un animal</option>
                   {animals.map((animal) => (
                     <option key={animal._id} value={animal._id}>
-                      {animal.nom_prioritaire} - {animal.identification}
+                      {animal.nom} - {animal.identification}
                     </option>
                   ))}
                 </select>

@@ -102,7 +102,7 @@ const ListProduitAlimentaireForm: React.FC = () => {
           />
         </div>
         {error && <p className="text-red-500 mb-4">{error}</p>}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto bg-white p-4 rounded-lg">
           <ProduitAlimentaireTable
             produitAlimentaires={filteredProduitAlimentaires}
             handleDeleteProduitAlimentaire={handleDeleteProduitAlimentaire}

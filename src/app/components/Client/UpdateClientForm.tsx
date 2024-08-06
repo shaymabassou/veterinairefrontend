@@ -12,10 +12,8 @@ const UpdateClientForm: React.FC = () => {
     firstname: '',
     lastname: '',
     email: '',
-    CIN: '',
     tel: '',
     adresse: '',
-    dateNaissance: '',
     animalid: '',
   });
   const [error, setError] = useState<string | null>(null);
@@ -40,12 +38,10 @@ const UpdateClientForm: React.FC = () => {
           setClient({
             firstname: clientData.firstname,
             lastname: clientData.lastname,
-            email: clientData.email,
-            CIN: clientData.CIN,
+            email:clientData.email,
             tel: clientData.tel,
             adresse: clientData.adresse,
-            dateNaissance: clientData.dateNaissance,
-            animalid: clientData.animalid,
+            // animalid: clientData.animalid,
           });
         } catch (error: any) {
           setError(`Échec du chargement du client : ${error.response?.data?.message || error.message}`);
@@ -100,7 +96,7 @@ const UpdateClientForm: React.FC = () => {
         <div className="w-full max-w-lg bg-white bg-opacity-10 p-9 rounded-lg shadow-lg ml-40">
           <form onSubmit={handleSubmit} className="w-full">
             <h2 className="text-2xl mb-6 text-center">Mettre à jour le Client</h2>
-            {['firstname', 'lastname', 'email', 'CIN', 'tel', 'adresse', 'dateNaissance', 'animalid'].map((field) => (
+            {['firstname', 'lastname', 'email', 'tel', 'adresse'].map((field) => (
               <div className="mb-4" key={field}>
                 <label className="block text-gray-700 mb-2">{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
                 <input

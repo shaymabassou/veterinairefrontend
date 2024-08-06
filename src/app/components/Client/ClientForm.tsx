@@ -8,20 +8,27 @@ const ClientForm: React.FC = () => {
     firstname: '',
     lastname: '',
     email: '',
-    CIN: '',
     tel: '',
     adresse: '',
-    dateNaissance: ''
+   
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+
+    if (name === 'tel' && !/^\d*$/.test(value)) {
+      setError('Le champ téléphone ne peut contenir que des chiffres.');
+      return;
+    }
+
     setForm({
       ...form,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -42,10 +49,9 @@ const ClientForm: React.FC = () => {
           firstname: form.firstname,
           lastname: form.lastname,
           email: form.email,
-          CIN: form.CIN,
           tel: form.tel,
-          adresse: form.adresse,
-          dateNaissance: form.dateNaissance
+          adresse: form.adresse
+         
         },
         {
           headers: {
@@ -104,23 +110,13 @@ const ClientForm: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 mb-2">CIN</label>
-                <input
-                  type="text"
-                  name="CIN"
-                  value={form.CIN}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
                 <label className="block text-gray-700 mb-2">Tel</label>
                 <input
                   type="tel"
                   name="tel"
                   value={form.tel}
                   onChange={handleChange}
+                  pattern="\d*"
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -136,16 +132,7 @@ const ClientForm: React.FC = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <div>
-                <label className="block text-gray-700 mb-2">Date de Naissance</label>
-                <input
-                  type="date"
-                  name="dateNaissance"
-                  value={form.dateNaissance}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              
             </div>
             {error && <p className="text-red-500">{error}</p>}
             {success && <p className="text-green-500">{success}</p>}

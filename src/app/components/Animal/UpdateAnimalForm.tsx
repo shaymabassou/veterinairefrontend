@@ -10,15 +10,15 @@ const UpdateAnimalForm: React.FC = () => {
 
   const [form, setForm] = useState({
     numero_de_fiche: '',
-    nom_prioritaire: '',
+    nom: '',
     espece: '',
     race: '',
     age: '',
     sex: '',
     identification: '',
-    clientId: '',
+    clientId: '', // Rempli avec le client actuel
   });
-  const [clients, setClients] = useState([]);
+  const [clients, setClients] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -39,13 +39,13 @@ const UpdateAnimalForm: React.FC = () => {
         const animalData = response.data;
         setForm({
           numero_de_fiche: animalData.numero_de_fiche,
-          nom_prioritaire: animalData.nom_prioritaire,
+          nom: animalData.nom,
           espece: animalData.espece,
           race: animalData.race,
           age: animalData.age,
           sex: animalData.sex,
           identification: animalData.identification,
-          clientId: animalData.clientId,
+          clientId: animalData.clientId._id, // Remplir le clientId
         });
       } catch (error: any) {
         setError(`Échec du chargement de l'animal : ${error.response?.data?.message || error.message}`);
@@ -80,7 +80,7 @@ const UpdateAnimalForm: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({
       ...form,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -98,16 +98,7 @@ const UpdateAnimalForm: React.FC = () => {
     try {
       await axios.put(
         `http://localhost:3000/animals/${id}`,
-        {
-          numero_de_fiche: form.numero_de_fiche,
-          nom_prioritaire: form.nom_prioritaire,
-          espece: form.espece,
-          race: form.race,
-          age: form.age,
-          sex: form.sex,
-          identification: form.identification,
-          clientId: form.clientId,
-        },
+        form,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -116,7 +107,7 @@ const UpdateAnimalForm: React.FC = () => {
       );
 
       setSuccess('Animal mis à jour avec succès.');
-      router.push('/listeanimal'); // Redirect to the animals list page after successful update
+      router.push('/listeanimal'); // Rediriger vers la page de la liste des animaux après une mise à jour réussie
     } catch (error: any) {
       setError(`Erreur lors de la mise à jour de l'animal : ${error.response?.data?.message || error.message}`);
     }
@@ -143,11 +134,11 @@ const UpdateAnimalForm: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 mb-2">Nom Prioritaire</label>
+                <label className="block text-gray-700 mb-2">Nom</label>
                 <input
                   type="text"
-                  name="nom_prioritaire"
-                  value={form.nom_prioritaire}
+                  name="nom"
+                  value={form.nom}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -178,7 +169,7 @@ const UpdateAnimalForm: React.FC = () => {
               <div>
                 <label className="block text-gray-700 mb-2">Âge</label>
                 <input
-                  type="number"
+                  type="text"
                   name="age"
                   value={form.age}
                   onChange={handleChange}
@@ -221,7 +212,7 @@ const UpdateAnimalForm: React.FC = () => {
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Client</option>
+                  <option value="">Sélectionner un client</option>
                   {clients.map((client) => (
                     <option key={client._id} value={client._id}>
                       {client.firstname} {client.lastname}
@@ -233,7 +224,7 @@ const UpdateAnimalForm: React.FC = () => {
             {error && <p className="text-red-500">{error}</p>}
             {success && <p className="text-green-500">{success}</p>}
             <div className="flex justify-center">
-              <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                 Mettre à jour
               </button>
             </div>

@@ -11,13 +11,13 @@ const UpdateMaterielConsommableForm: React.FC = () => {
   const [nom, setNom] = useState<string>('');
   const [type, setType] = useState<string>('');
   const [quantite, setQuantite] = useState<string>('');
-  const [unite, setUnite] = useState<string>('mg');
+  // const [unite, setUnite] = useState<string>('mg');
   const [prixAchat, setPrixAchat] = useState<string>('');
   const [dateExpiration, setDateExpiration] = useState<string>('');
+  const [margin, setMargin] = useState<string>('');
   const [prixVente, setPrixVente] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
 
   useEffect(() => {
     if (id) {
@@ -35,13 +35,16 @@ const UpdateMaterielConsommableForm: React.FC = () => {
             },
           });
           const materielConsommable = response.data;
-          setNom(materielConsommable.nom);
-          setType(materielConsommable.type);
-          setQuantite(materielConsommable.quantite.split(' ')[0]);
-          setUnite(materielConsommable.quantite.split(' ')[1]);
-          setPrixAchat(materielConsommable.prixAchat.toString());
-          setDateExpiration(materielConsommable.dateExpiration);
-          setPrixVente(materielConsommable.prixVente.toString());
+          setNom(materielConsommable.nom || '');
+          setType(materielConsommable.type || '');
+          setQuantite(materielConsommable.quantite.split(' ')[0] || '');
+          // setUnite(materielConsommable.quantite.split(' ')[1] || 'mg');
+          setPrixAchat(materielConsommable.prixAchat?.toString() || '');
+          setMargin(materielConsommable.margin?.toString() || '');
+          // Format the date to YYYY-MM-DD
+          const formattedDateExpiration = new Date(materielConsommable.dateExpiration).toISOString().split('T')[0];
+          setDateExpiration(formattedDateExpiration);
+          setPrixVente(materielConsommable.prixVente?.toString() || '');
         } catch (error: any) {
           setError(`Échec du chargement du matériel consommable : ${error.response?.data?.message || error.message}`);
         }
@@ -51,9 +54,8 @@ const UpdateMaterielConsommableForm: React.FC = () => {
     }
   }, [id]);
 
-  const calculatePrixVente = (prixAchat: number): number => {
-    const pourcentage = 1.2; // Replace with your percentage
-    return prixAchat * pourcentage;
+  const calculatePrixVente = (prixAchat: number, margin: number): number => {
+    return Math.round(prixAchat * margin * 100) / 100;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -68,15 +70,25 @@ const UpdateMaterielConsommableForm: React.FC = () => {
     }
 
     try {
-      const prixVente = calculatePrixVente(parseFloat(prixAchat));
+      const prixAchatNum = parseFloat(prixAchat);
+      const marginNum = parseFloat(margin);
+
+      if (marginNum <= 0) {
+        setError('La marge doit être supérieure à 0.');
+        return;
+      }
+
+      const prixVente = calculatePrixVente(prixAchatNum, marginNum);
+
       await axios.put(
         `http://localhost:3000/stock/materiel-consommable/${id}`,
         {
           nom,
           type,
-          quantite: `${quantite} ${unite}`,
-          prixAchat: parseFloat(prixAchat),
+          quantite: `${quantite}`,
+          prixAchat: prixAchatNum,
           dateExpiration,
+          margin: marginNum,
           prixVente,
         },
         {
@@ -97,7 +109,7 @@ const UpdateMaterielConsommableForm: React.FC = () => {
     <div className="flex min-h-screen bg-white">
       <SideNavbar />
       <div className="flex-1 flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/images/materiel.jpg')" }}>
-        <div className="w-full max-w-lg bg-white bg-opacity-80 p-9 rounded-lg shadow-lg">
+        <div className="w-full max-w-lg bg-white bg-opacity-80 p-9 rounded-lg shadow-lg ml-60">
           <form onSubmit={handleSubmit} className="w-full">
             <h2 className="text-2xl mb-6 text-center">Mettre à jour le Matériel Consommable</h2>
             <div className="mb-4">
@@ -123,22 +135,33 @@ const UpdateMaterielConsommableForm: React.FC = () => {
             <div className="mb-4 flex items-center">
               <label className="block text-gray-700 mb-2">Quantité:</label>
               <input
-                type="text"
+                type="number"
                 value={quantite}
                 onChange={(e) => setQuantite(e.target.value)}
                 required
                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-
+              
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 mb-2">Prix d'Achat:</label>
               <input
-                type="text"
+                type="number"
                 value={prixAchat}
                 onChange={(e) => setPrixAchat(e.target.value)}
                 required
                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Pourcentage:</label>
+              <input
+                type="text"
+                value={margin}
+                onChange={(e) => setMargin(e.target.value)}
+                required
+                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ex: 1.2 pour 20% de marge"
               />
             </div>
             <div className="mb-4">

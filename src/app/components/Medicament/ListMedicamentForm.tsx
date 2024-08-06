@@ -13,6 +13,7 @@ interface Medicament {
   prixAchat: string;
   dateExpiration: string;
   prixVente: string;
+  margin:string;
 }
 
 const ListMedicamentForm: React.FC = () => {
@@ -103,7 +104,7 @@ const ListMedicamentForm: React.FC = () => {
           />
         </div>
         {error && <p className="text-red-500 mb-4">{error}</p>}
-        <div className="overflow-x-auto bg-white p-4 shadow-md rounded-lg">
+        <div className="overflow-x-auto bg-white p-4  rounded-lg">
           <MedicamentTable
             medicaments={filteredMedicaments}
             handleDeleteMedicament={handleDeleteMedicament}

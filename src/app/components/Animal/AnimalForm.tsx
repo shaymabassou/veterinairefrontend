@@ -6,7 +6,7 @@ import SideNavbar from '../SideNavbar';
 const AnimalForm: React.FC = () => {
   const [form, setForm] = useState({
     numero_de_fiche: '',
-    nom_prioritaire: '',
+    nom: '',
     espece: '',
     race: '',
     age: '',
@@ -64,7 +64,7 @@ const AnimalForm: React.FC = () => {
         'http://localhost:3000/animals',
         {
           numero_de_fiche: form.numero_de_fiche,
-          nom_prioritaire: form.nom_prioritaire,
+          nom: form.nom,
           espece: form.espece,
           race: form.race,
           age: form.age,
@@ -98,7 +98,7 @@ const AnimalForm: React.FC = () => {
               <div>
                 <label className="block text-gray-700 mb-2">Numéro de Fiche</label>
                 <input
-                  type="text"
+                  type="number"
                   name="numero_de_fiche"
                   value={form.numero_de_fiche}
                   onChange={handleChange}
@@ -107,11 +107,11 @@ const AnimalForm: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 mb-2">Nom Prioritaire</label>
+                <label className="block text-gray-700 mb-2">Nom</label>
                 <input
                   type="text"
-                  name="nom_prioritaire"
-                  value={form.nom_prioritaire}
+                  name="nom"
+                  value={form.nom}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -142,7 +142,7 @@ const AnimalForm: React.FC = () => {
               <div>
                 <label className="block text-gray-700 mb-2">Âge</label>
                 <input
-                  type="number"
+                  type="text"
                   name="age"
                   value={form.age}
                   onChange={handleChange}

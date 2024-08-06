@@ -10,10 +10,8 @@ interface Client {
   firstname: string;
   lastname: string;
   email: string;
-  CIN: string;
-  tel: string;
+  tel: number;
   adresse: string;
-  dateNaissance: string;
 }
 
 const ListClientForm: React.FC = () => {
@@ -87,7 +85,7 @@ const ListClientForm: React.FC = () => {
   return (
     <div className="flex min-h-screen bg-white">
       <SideNavbar />
-      <main className="flex-grow p-6 ml-64 bg-white overflow-x-hidden">
+      <main className="flex-grow p-4 ml-64 bg-white overflow-x-hidden">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-gray-600">Liste des Clients</h1>
           <button
@@ -108,53 +106,51 @@ const ListClientForm: React.FC = () => {
           />
         </div>
         {error && <p className="text-red-500 mb-4">{error}</p>}
-        <div className="overflow-x-auto bg-white p-4 shadow-md rounded-lg">
-          <table className="min-w-full bg-white border table-fixed">
-            <thead className="bg-gray-200">
+        <div className="overflow-x-auto bg-white p-4  rounded-lg">
+          <table className="min-w-full bg-white border border-gray-300 table-fixed">
+            <thead className="bg-gray-200 border-b border-gray-300">
               <tr>
-                <th className="px-4 py-2">Prénom</th>
-                <th className="px-4 py-2">Nom</th>
-                <th className="px-4 py-2">Email</th>
-                <th className="px-4 py-2">CIN</th>
-                <th className="px-4 py-2">Téléphone</th>
-                <th className="px-4 py-2">Adresse</th>
-                <th className="px-4 py-2">Date de Naissance</th>
+                <th className="px-4 py-2 border-r border-gray-300">Prénom</th>
+                <th className="px-4 py-2 border-r border-gray-300">Nom</th>
+                <th className="px-4 py-2 border-r border-gray-300">Email</th>
+                <th className="px-4 py-2 border-r border-gray-300">Téléphone</th>
+                <th className="px-4 py-2 border-r border-gray-300">Adresse</th>
                 <th className="px-4 py-2">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredClients.map((client) => (
-                <tr key={client._id} className="hover:bg-gray-100 cursor-pointer">
-                  <td className="px-4 py-2 flex items-center space-x-2" onClick={() => handleClientClick(client._id)}>
+                <tr key={client._id} className="hover:bg-gray-100 cursor-pointer border-b border-gray-300">
+                  <td className="px-4 py-2 border-r border-gray-300 flex items-center" onClick={() => handleClientClick(client._id)}>
                     <MdPerson className="mr-2" /> {client.firstname}
                   </td>
-                  <td className="px-4 py-2" onClick={() => handleClientClick(client._id)}>
+                  <td className="px-4 py-2 border-r border-gray-300" onClick={() => handleClientClick(client._id)}>
                     {client.lastname}
                   </td>
-                  <td className="px-4 py-2">{client.email}</td>
-                  <td className="px-4 py-2">{client.CIN}</td>
-                  <td className="px-4 py-2">{client.tel}</td>
-                  <td className="px-4 py-2">{client.adresse}</td>
-                  <td className="px-4 py-2">{client.dateNaissance}</td>
+                  <td className="px-4 py-2 border-r border-gray-300">{client.email}</td>
+                  <td className="px-4 py-2 border-r border-gray-300">{client.tel}</td>
+                  <td className="px-4 py-2 border-r border-gray-300">{client.adresse}</td>
                   <td className="px-4 py-2 flex justify-center">
-                    <button
-                      className="text-blue-500 hover:text-blue-700 mr-2"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        router.push(`/updateclient?id=${client._id}`);
-                      }}
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
-                      className="text-red-500 hover:text-red-700"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleDeleteClient(client._id);
-                      }}
-                    >
-                      <FaTrash />
-                    </button>
+                    <div className="flex space-x-2">
+                      <button
+                        className="flex items-center border border-green-500 text-green-500 px-2 py-1 rounded-md shadow-md hover:bg-green-100"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          router.push(`/updateclient?id=${client._id}`);
+                        }}
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        className="flex items-center border border-red-500 text-red-500 px-2 py-1 rounded-md shadow-md hover:bg-red-100"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleDeleteClient(client._id);
+                        }}
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

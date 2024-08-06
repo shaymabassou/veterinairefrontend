@@ -90,7 +90,7 @@ const SideNavbar = () => {
                   <GiHamburgerMenu className={`w-5 h-5 text-gray-400 ${open ? 'transform rotate-90' : ''}`} />
                 </Disclosure.Button>
                 <Disclosure.Panel className="pl-4 space-y-2">
-                  <NavItem href="/addordonnance" icon={<AiOutlineFileText />} label="Ordonnances" />
+                  <NavItem href="/listeordonnance" icon={<AiOutlineFileText />} label="Liste Des Ordonnances" />
                 </Disclosure.Panel>
               </>
             )}
@@ -105,7 +105,7 @@ const SideNavbar = () => {
                   <GiHamburgerMenu className={`w-5 h-5 text-gray-400 ${open ? 'transform rotate-90' : ''}`} />
                 </Disclosure.Button>
                 <Disclosure.Panel className="pl-4 space-y-2">
-                  <NavItem href="/billing" icon={<RiBillLine />} label="Factures" />
+                  <NavItem href="/addfacturation" icon={<RiBillLine />} label="Factures" />
                 </Disclosure.Panel>
               </>
             )}

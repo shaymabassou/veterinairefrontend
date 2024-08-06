@@ -8,10 +8,8 @@ interface Client {
   firstname: string;
   lastname: string;
   email: string;
-  CIN: string;
-  tel: string;
+  tel: number;
   adresse: string;
-  dateNaissance: string;
   photoUrl: string; // Ajouter le champ photoUrl
 }
 
@@ -75,10 +73,9 @@ const ClientDetails: React.FC = () => {
             <p><strong>Prénom:</strong> {client.firstname}</p>
             <p><strong>Nom:</strong> {client.lastname}</p>
             <p><strong>Email:</strong> {client.email}</p>
-            <p><strong>CIN:</strong> {client.CIN}</p>
             <p><strong>Téléphone:</strong> {client.tel}</p>
             <p><strong>Adresse:</strong> {client.adresse}</p>
-            <p><strong>Date de Naissance:</strong> {new Date(client.dateNaissance).toLocaleDateString()}</p>
+            {/* <p><strong>Date de Naissance:</strong> {new Date(client.dateNaissance).toLocaleDateString()}</p> */}
             {/* <p><strong>Animal ID:</strong> {client.animalid}</p> */}
           </div>
         </div>
