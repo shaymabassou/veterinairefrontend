@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import SideNavbar from '../SideNavbar';
-import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
 
-const FacturationForm: React.FC = () => {
+const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturationId }) => {
   const getCurrentDate = () => {
     const today = new Date();
     const year = today.getFullYear();
@@ -38,7 +37,6 @@ const FacturationForm: React.FC = () => {
   const [prixGlobale, setPrixGlobale] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [facturations, setFacturations] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -50,7 +48,7 @@ const FacturationForm: React.FC = () => {
       }
 
       try {
-        const [medicamentRes, produitAlimentaireRes, materielConsommableRes, clientsRes, facturationsRes] = await Promise.all([
+        const [medicamentRes, produitAlimentaireRes, materielConsommableRes, clientsRes, facturationRes] = await Promise.all([
           axios.get('http://localhost:3000/stock/medicaments', {
             headers: { Authorization: `Bearer ${token}` },
           }),
@@ -63,7 +61,7 @@ const FacturationForm: React.FC = () => {
           axios.get('http://localhost:3000/users/clients', {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get('http://localhost:3000/facturation', {
+          axios.get(`http://localhost:3000/facturation/${facturationId}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -72,14 +70,32 @@ const FacturationForm: React.FC = () => {
         setProduitalimentaires(produitAlimentaireRes.data);
         setMaterielconsommables(materielConsommableRes.data);
         setClients(clientsRes.data);
-        setFacturations(facturationsRes.data);
+
+        const facturationData = facturationRes.data;
+        setForm({
+          prixConsultation: facturationData.prixConsultation,
+          facture_n: facturationData.facture_n,
+          date: facturationData.date || getCurrentDate(),
+          clientId: facturationData.clientId,
+          clientAdresse: facturationData.clientAdresse,
+          clientTel: facturationData.clientTel,
+          medicamentId: facturationData.medicamentId || '',
+          produitalimentaireId: facturationData.produitalimentaireId || '',
+          materielconsommableId: facturationData.materielconsommableId || '',
+        });
+
+        setSelectedOptions({
+          medicament: !!facturationData.medicamentId,
+          produitalimentaire: !!facturationData.produitalimentaireId,
+          materielconsommable: !!facturationData.materielconsommableId,
+        });
       } catch (error) {
         setError('Erreur lors du chargement des données.');
       }
     };
 
     fetchData();
-  }, []);
+  }, [facturationId]);
 
   useEffect(() => {
     let total = parseFloat(form.prixConsultation) || 0;
@@ -116,35 +132,6 @@ const FacturationForm: React.FC = () => {
     });
   };
 
-  const handleViewFacturation = (id: string) => {
-    router.push(`/facturation/${id}`);
-  };
-  
-  const handleEditFacturation = (id: string) => {
-    router.push(`/updatefacturation?id=${id}`);
-  };
-  
-  const handleDeleteFacturation = async (id: string) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('Token non trouvé. Veuillez vous reconnecter.');
-      return;
-    }
-  
-    try {
-      await axios.delete(`http://localhost:3000/facturation/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setFacturations(facturations.filter(facturation => facturation._id !== id));
-      setSuccess('Facturation supprimée avec succès.');
-    } catch (error) {
-      console.error('Error details:', error.response?.data || error.message);
-      setError("Erreur lors de la suppression de la facturation. Veuillez réessayer.");
-    }
-  };
-
   const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedClient = clients.find(client => client._id === e.target.value);
     setForm({
@@ -173,8 +160,8 @@ const FacturationForm: React.FC = () => {
         prixGlobale,
       };
 
-      const response = await axios.post(
-        'http://localhost:3000/facturation',
+      await axios.put(
+        `http://localhost:3000/facturation/${facturationId}`,
         formData,
         {
           headers: {
@@ -183,29 +170,12 @@ const FacturationForm: React.FC = () => {
         }
       );
 
-      setFacturations([...facturations, response.data]);
-      setSuccess('Facturation ajoutée avec succès.');
-      // Réinitialiser le formulaire après soumission
-      setForm({
-        prixConsultation: '',
-        facture_n: '',
-        date: getCurrentDate(),
-        clientId: '',
-        clientAdresse: '',
-        clientTel: '',
-        medicamentId: '',
-        produitalimentaireId: '',
-        materielconsommableId: '',
-      });
+      setSuccess('Facturation mise à jour avec succès.');
+      router.push('/facturation');
     } catch (error) {
       console.error('Error details:', error.response?.data || error.message);
-      setError("Erreur lors de l'ajout de la facturation. Veuillez réessayer.");
+      setError("Erreur lors de la mise à jour de la facturation. Veuillez réessayer.");
     }
-  };
-
-  const getItemPrice = (id: string, list: any[]) => {
-    const item = list.find(i => i._id === id);
-    return item ? item.prixVente : 0;
   };
 
   return (
@@ -213,8 +183,11 @@ const FacturationForm: React.FC = () => {
       <SideNavbar />
       <div className="flex-1 flex flex-col items-center justify-center p-10 bg-white-100 ml-60">
         <div className="w-full p-20">
-          <h2 className="text-3xl mb-6 text-center font-semibold text-gray-700">Ajouter une Facturation</h2>
+          <h2 className="text-3xl mb-6 text-center font-semibold text-gray-700">Mettre à jour une Facturation</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Form Fields (Similar to FacturationForm) */}
+            {/* Similar to FacturationForm, but populated with data from the existing facturation */}
+            {/* Display the fields with the current values and allow modification */}
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-gray-700 mb-2">Numéro de Facture</label>
@@ -250,7 +223,7 @@ const FacturationForm: React.FC = () => {
                   <option value="">Sélectionnez un client</option>
                   {clients.map(client => (
                     <option key={client._id} value={client._id}>
-                      {client.firstname} {client.lastname}
+                      {client.nom} {client.prenom}
                     </option>
                   ))}
                 </select>
@@ -262,8 +235,8 @@ const FacturationForm: React.FC = () => {
                   name="clientAdresse"
                   value={form.clientAdresse}
                   onChange={handleChange}
-                  readOnly
-                  className="w-full px-4 py-2 border border-gray-300 rounded bg-gray-100"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -273,12 +246,12 @@ const FacturationForm: React.FC = () => {
                   name="clientTel"
                   value={form.clientTel}
                   onChange={handleChange}
-                  readOnly
-                  className="w-full px-4 py-2 border border-gray-300 rounded bg-gray-100"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 mb-2">Prix Consultation</label>
+                <label className="block text-gray-700 mb-2">Prix de la Consultation</label>
                 <input
                   type="number"
                   name="prixConsultation"
@@ -289,8 +262,8 @@ const FacturationForm: React.FC = () => {
                 />
               </div>
             </div>
-            <h1>Selectionner Produit Acheté :</h1>
-            <div className="mt-4">
+
+            <div>
               <label className="block text-gray-700 mb-2">Ajouter un Médicament</label>
               <input
                 type="checkbox"
@@ -304,20 +277,19 @@ const FacturationForm: React.FC = () => {
                   name="medicamentId"
                   value={form.medicamentId}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Sélectionnez un médicament</option>
                   {medicaments.map(medicament => (
                     <option key={medicament._id} value={medicament._id}>
-                      {medicament.nom} (Prix: {medicament.prixVente})
+                      {medicament.nom}
                     </option>
                   ))}
                 </select>
               )}
             </div>
 
-            <div className="mt-4">
+            <div>
               <label className="block text-gray-700 mb-2">Ajouter un Produit Alimentaire</label>
               <input
                 type="checkbox"
@@ -331,20 +303,19 @@ const FacturationForm: React.FC = () => {
                   name="produitalimentaireId"
                   value={form.produitalimentaireId}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Sélectionnez un produit alimentaire</option>
                   {produitalimentaires.map(produitalimentaire => (
                     <option key={produitalimentaire._id} value={produitalimentaire._id}>
-                      {produitalimentaire.nom} (Prix: {produitalimentaire.prixVente})
+                      {produitalimentaire.nom}
                     </option>
                   ))}
                 </select>
               )}
             </div>
 
-            <div className="mt-4">
+            <div>
               <label className="block text-gray-700 mb-2">Ajouter un Matériel Consommable</label>
               <input
                 type="checkbox"
@@ -358,117 +329,42 @@ const FacturationForm: React.FC = () => {
                   name="materielconsommableId"
                   value={form.materielconsommableId}
                   onChange={handleChange}
-                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Sélectionnez un matériel consommable</option>
                   {materielconsommables.map(materielconsommable => (
                     <option key={materielconsommable._id} value={materielconsommable._id}>
-                      {materielconsommable.nom} (Prix: {materielconsommable.prixVente})
+                      {materielconsommable.nom}
                     </option>
                   ))}
                 </select>
               )}
             </div>
 
-            <div className="flex justify-center mt-6">
-              <button
-                type="submit"
-                className="bg-blue-500 text-white w-15 px-5 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
-              >
-                Ajouter 
-              </button>
+            <div className="mt-6">
+              <label className="block text-gray-700 mb-2">Prix Total</label>
+              <input
+                type="number"
+                value={prixGlobale}
+                readOnly
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
 
-            {error && (
-              <div className="mt-4 text-red-600 text-center">{error}</div>
-            )}
-            {success && (
-              <div className="mt-4 text-green-600 text-center">{success}</div>
-            )}
+            {error && <p className="text-red-500 mt-4">{error}</p>}
+            {success && <p className="text-green-500 mt-4">{success}</p>}
+
+            <button
+              type="submit"
+              className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Mettre à jour la Facturation
+            </button>
           </form>
-
-          <h2 className="text-2xl mt-10 mb-4 text-center font-semibold text-gray-700">Liste des Facturations</h2>
-          <table className=" min-w-full bg-white border border-gray-300 ">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 border border-gray-300 text-left">Numéro de Facture</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Date</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Client</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Produit Acheté</th> 
-                <th className="px-4 py-2 border border-gray-300 text-left">Prix Consultation</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Prix Globale</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Status</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Actions</th>
-              </tr>
-            </thead>
-             <tbody>
-
-            
-              
-              {facturations.map(facturation => (
-                <tr key={facturation._id}>
-                  <td className="px-4 py-2 border border-gray-300">{facturation.facture_n}</td>
-                  <td className="px-4 py-2 border border-gray-300">{new Date(facturation.date).toLocaleDateString()}</td>
-                  <td className="px-4 py-2 border border-gray-300">{facturation.clientId ? `${facturation.clientId.firstname} ${facturation.clientId.lastname}` : ''}</td>
-                  <td className="px-4 py-2 border border-gray-300">
-  {facturation.medicamentId && facturation.produitalimentaireId && facturation.materielconsommableId ? (
-    <>
-      <div>{`${facturation.medicamentId.nom}(${facturation.medicamentId.prixVente}dt)`}</div>
-      <div>{`${facturation.produitalimentaireId.nom}(${facturation.produitalimentaireId.prixVente}dt)`}</div>
-      <div>{`${facturation.materielconsommableId.nom}(${facturation.materielconsommableId.prixVente}dt)`}</div>
-    </>
-  ) : (
-    <>
-      {facturation.medicamentId && (
-        <div>{`${facturation.medicamentId.nom}(${facturation.medicamentId.prixVente}dt)`}</div>
-      )}
-      {facturation.produitalimentaireId && (
-        <div>{`${facturation.produitalimentaireId.nom}(${facturation.produitalimentaireId.prixVente}dt)`}</div>
-      )}
-      {facturation.materielconsommableId && (
-        <div>{`${facturation.materielconsommableId.nom}(${facturation.materielconsommableId.prixVente}dt)`}</div>
-      )}
-    </>
-  )}
-</td>
- <td className="px-4 py-2 border border-gray-300">{facturation.prixConsultation}dt</td>
-                  <td className="px-4 py-2 border border-gray-300">{facturation.prixGlobale}dt</td>
-                  
-                  <td className="px-2 py-1 border border-gray-300"> 
-                     <div className="flex justify-center space-x-2">
-                    <button type="submit"
-                className="bg-red-500 text-white w-15 px-1 py-1 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-              >
-                Payement
-              </button>
-            </div></td>
-                 
-                 
-                  <td className="px-4 py-2 border-b">
-                      <div className="flex justify-center space-x-2">
-                        <FaEye
-                          className="text-blue-500 cursor-pointer"
-                          onClick={() => handleViewFacturation(facturation._id)}
-                        />
-                        <FaEdit
-                          className="text-green-500 cursor-pointer"
-                          onClick={() => handleEditFacturation(facturation._id)}
-                        />
-                        <FaTrash
-                          className="text-red-500 cursor-pointer"
-                          onClick={() => handleDeleteFacturation(facturation._id)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
-    );
+    </div>
+  );
 };
 
-export default FacturationForm;
+export default UpdateFacturationForm;

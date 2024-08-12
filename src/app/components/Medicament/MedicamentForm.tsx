@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import SideNavbar from '../SideNavbar';
@@ -75,6 +75,7 @@ const MedicamentForm: React.FC = () => {
       );
       setSuccess('Médicament ajouté avec succès');
       router.push('/listemedicament');
+      
     } catch (error: any) {
       setError(`Échec de l'ajout du médicament : ${error.response?.data?.message || error.message}`);
       console.error('Error adding medicament:', error.response?.data || error.message);

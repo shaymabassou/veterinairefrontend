@@ -120,42 +120,42 @@ const OrdonnanceForm: React.FC = () => {
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-gray-700 mb-2">Nom du Médicament</label>
-                <select
+                <input
+                  type="text"
                   name="nom"
+                  list="medicament-names"
                   value={form.nom}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Sélectionner un médicament</option>
+                />
+                <datalist id="medicament-names">
                   {medicamentNames.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
+                    <option key={name} value={name} />
                   ))}
-                </select>
+                </datalist>
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">Type de Médicament</label>
-                <select
+                <input
+                  type="text"
                   name="type"
+                  list="medicament-types"
                   value={form.type}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Sélectionner un type</option>
+                />
+                <datalist id="medicament-types">
                   {medicamentTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
+                    <option key={type} value={type} />
                   ))}
-                </select>
+                </datalist>
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">Dosage</label>
                 <input
-                  type="text"
+                  type="number"
                   name="dosage"
                   value={form.dosage}
                   onChange={handleChange}
