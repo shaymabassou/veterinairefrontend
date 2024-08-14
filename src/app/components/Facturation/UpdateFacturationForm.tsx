@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import SideNavbar from '../SideNavbar';
 
-const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturationId }) => {
+const UpdateFacturationForm: React.FC = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
+
   const getCurrentDate = () => {
     const today = new Date();
     const year = today.getFullYear();
@@ -15,7 +19,7 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
   const [form, setForm] = useState({
     prixConsultation: '',
     facture_n: '',
-    date: getCurrentDate(),
+    date: '',
     clientId: '',
     clientAdresse: '',
     clientTel: '',
@@ -37,7 +41,6 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
   const [prixGlobale, setPrixGlobale] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +51,16 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
       }
 
       try {
-        const [medicamentRes, produitAlimentaireRes, materielConsommableRes, clientsRes, facturationRes] = await Promise.all([
+        const [
+          facturationRes,
+          medicamentRes,
+          produitAlimentaireRes,
+          materielConsommableRes,
+          clientsRes,
+        ] = await Promise.all([
+          axios.get(`http://localhost:3000/facturation/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
           axios.get('http://localhost:3000/stock/medicaments', {
             headers: { Authorization: `Bearer ${token}` },
           }),
@@ -61,33 +73,30 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
           axios.get('http://localhost:3000/users/clients', {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`http://localhost:3000/facturation/${facturationId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
         ]);
+
+        const facturation = facturationRes.data;
+        setForm({
+          prixConsultation: facturation.prixConsultation,
+          facture_n: facturation.facture_n,
+          date: facturation.date ? facturation.date.slice(0, 10) : '',
+          clientId: facturation.clientId?._id || '',
+          clientAdresse: facturation.clientAdresse || '',
+          clientTel: facturation.clientTel || '',
+          medicamentId: facturation.medicamentId || '',
+          produitalimentaireId: facturation.produitalimentaireId || '',
+          materielconsommableId: facturation.materielconsommableId || '',
+        });
 
         setMedicaments(medicamentRes.data);
         setProduitalimentaires(produitAlimentaireRes.data);
         setMaterielconsommables(materielConsommableRes.data);
         setClients(clientsRes.data);
 
-        const facturationData = facturationRes.data;
-        setForm({
-          prixConsultation: facturationData.prixConsultation,
-          facture_n: facturationData.facture_n,
-          date: facturationData.date || getCurrentDate(),
-          clientId: facturationData.clientId,
-          clientAdresse: facturationData.clientAdresse,
-          clientTel: facturationData.clientTel,
-          medicamentId: facturationData.medicamentId || '',
-          produitalimentaireId: facturationData.produitalimentaireId || '',
-          materielconsommableId: facturationData.materielconsommableId || '',
-        });
-
         setSelectedOptions({
-          medicament: !!facturationData.medicamentId,
-          produitalimentaire: !!facturationData.produitalimentaireId,
-          materielconsommable: !!facturationData.materielconsommableId,
+          medicament: !!facturation.medicamentId,
+          produitalimentaire: !!facturation.produitalimentaireId,
+          materielconsommable: !!facturation.materielconsommableId,
         });
       } catch (error) {
         setError('Erreur lors du chargement des données.');
@@ -95,7 +104,7 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
     };
 
     fetchData();
-  }, [facturationId]);
+  }, [id]);
 
   useEffect(() => {
     let total = parseFloat(form.prixConsultation) || 0;
@@ -134,12 +143,14 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
 
   const handleClientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedClient = clients.find(client => client._id === e.target.value);
-    setForm({
-      ...form,
-      clientId: e.target.value,
-      clientAdresse: selectedClient ? selectedClient.adresse : '',
-      clientTel: selectedClient ? selectedClient.tel : '',
-    });
+    if (selectedClient) {
+      setForm({
+        ...form,
+        clientId: selectedClient._id,
+        clientAdresse: selectedClient.adresse,
+        clientTel: selectedClient.tel,
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -156,12 +167,13 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
     try {
       const formData = {
         ...form,
+
         prixConsultation: parseFloat(form.prixConsultation),
         prixGlobale,
       };
 
       await axios.put(
-        `http://localhost:3000/facturation/${facturationId}`,
+        `http://localhost:3000/facturation/${id}`,
         formData,
         {
           headers: {
@@ -179,15 +191,14 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="center">
       <SideNavbar />
-      <div className="flex-1 flex flex-col items-center justify-center p-10 bg-white-100 ml-60">
+      <div className="flex-1 flex flex-col items-center justify-center p-10 bg-white-100 ml-40">
         <div className="w-full p-20">
-          <h2 className="text-3xl mb-6 text-center font-semibold text-gray-700">Mettre à jour une Facturation</h2>
+          <h2 className="text-3xl mb-6 text-center font-semibold text-gray-700">Mettre à jour la Facturation</h2>
+          {error && <div className="text-red-500 mb-4">{error}</div>}
+          {success && <div className="text-green-500 mb-4">{success}</div>}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Form Fields (Similar to FacturationForm) */}
-            {/* Similar to FacturationForm, but populated with data from the existing facturation */}
-            {/* Display the fields with the current values and allow modification */}
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-gray-700 mb-2">Numéro de Facture</label>
@@ -220,10 +231,10 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Sélectionnez un client</option>
+                  <option value="">Sélectionner un client</option>
                   {clients.map(client => (
                     <option key={client._id} value={client._id}>
-                      {client.nom} {client.prenom}
+                      {client.firstname} {client.lastname}
                     </option>
                   ))}
                 </select>
@@ -235,23 +246,23 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
                   name="clientAdresse"
                   value={form.clientAdresse}
                   onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  readOnly
+                  className="w-full px-4 py-2 border border-gray-300 rounded"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 mb-2">Téléphone du Client</label>
+                <label className="block text-gray-700 mb-2">Numéro de Téléphone du Client</label>
                 <input
                   type="text"
                   name="clientTel"
                   value={form.clientTel}
                   onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  readOnly
+                  className="w-full px-4 py-2 border border-gray-300 rounded"
                 />
               </div>
               <div>
-                <label className="block text-gray-700 mb-2">Prix de la Consultation</label>
+                <label className="block text-gray-700 mb-2">Prix Consultation</label>
                 <input
                   type="number"
                   name="prixConsultation"
@@ -261,105 +272,105 @@ const UpdateFacturationForm: React.FC<{ facturationId: string }> = ({ facturatio
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-2">Ajouter un Médicament</label>
-              <input
-                type="checkbox"
-                name="medicament"
-                checked={selectedOptions.medicament}
-                onChange={handleCheckboxChange}
-                className="mr-2 leading-tight"
-              />
+              <div>
+                <label className="block text-gray-700 mb-2">Sélectionner les éléments</label>
+                <div className="space-y-2">
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="medicament"
+                      name="medicament"
+                      checked={selectedOptions.medicament}
+                      onChange={handleCheckboxChange}
+                    />
+                    <label htmlFor="medicament" className="ml-2">Médicament</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="produitalimentaire"
+                      name="produitalimentaire"
+                      checked={selectedOptions.produitalimentaire}
+                      onChange={handleCheckboxChange}
+                    />
+                    <label htmlFor="produitalimentaire" className="ml-2">Produit Alimentaire</label>
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="materielconsommable"
+                      name="materielconsommable"
+                      checked={selectedOptions.materielconsommable}
+                      onChange={handleCheckboxChange}
+                    />
+                    <label htmlFor="materielconsommable" className="ml-2">Matériel Consommable</label>
+                  </div>
+                </div>
+              </div>
               {selectedOptions.medicament && (
-                <select
-                  name="medicamentId"
-                  value={form.medicamentId}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Sélectionnez un médicament</option>
-                  {medicaments.map(medicament => (
-                    <option key={medicament._id} value={medicament._id}>
-                      {medicament.nom}
-                    </option>
-                  ))}
-                </select>
+                <div>
+                  <label className="block text-gray-700 mb-2">Médicament</label>
+                  <select
+                    name="medicamentId"
+                    value={form.medicamentId}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Sélectionner un médicament</option>
+                    {medicaments.map(medicament => (
+                      <option key={medicament._id} value={medicament._id}>
+                      {medicament.nom} (Prix: {medicament.prixVente})
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-2">Ajouter un Produit Alimentaire</label>
-              <input
-                type="checkbox"
-                name="produitalimentaire"
-                checked={selectedOptions.produitalimentaire}
-                onChange={handleCheckboxChange}
-                className="mr-2 leading-tight"
-              />
               {selectedOptions.produitalimentaire && (
-                <select
-                  name="produitalimentaireId"
-                  value={form.produitalimentaireId}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Sélectionnez un produit alimentaire</option>
-                  {produitalimentaires.map(produitalimentaire => (
-                    <option key={produitalimentaire._id} value={produitalimentaire._id}>
-                      {produitalimentaire.nom}
-                    </option>
-                  ))}
-                </select>
+                <div>
+                  <label className="block text-gray-700 mb-2">Produit Alimentaire</label>
+                  <select
+                    name="produitalimentaireId"
+                    value={form.produitalimentaireId}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Sélectionner un produit alimentaire</option>
+                    {produitalimentaires.map(p => (
+                      <option key={p._id} value={p._id}>
+                        {p.nom} (Prix: {p.prixVente})
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-2">Ajouter un Matériel Consommable</label>
-              <input
-                type="checkbox"
-                name="materielconsommable"
-                checked={selectedOptions.materielconsommable}
-                onChange={handleCheckboxChange}
-                className="mr-2 leading-tight"
-              />
               {selectedOptions.materielconsommable && (
-                <select
-                  name="materielconsommableId"
-                  value={form.materielconsommableId}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Sélectionnez un matériel consommable</option>
-                  {materielconsommables.map(materielconsommable => (
-                    <option key={materielconsommable._id} value={materielconsommable._id}>
-                      {materielconsommable.nom}
-                    </option>
-                  ))}
-                </select>
+                <div>
+                  <label className="block text-gray-700 mb-2">Matériel Consommable</label>
+                  <select
+                    name="materielconsommableId"
+                    value={form.materielconsommableId}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Sélectionner un matériel consommable</option>
+                    {materielconsommables.map(m => (
+                      <option key={m._id} value={m._id}>
+                        {m.nom} (Prix: {m.prixVente})
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
+              
             </div>
-
-            <div className="mt-6">
-              <label className="block text-gray-700 mb-2">Prix Total</label>
-              <input
-                type="number"
-                value={prixGlobale}
-                readOnly
-                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Mettre à jour
+              </button>
             </div>
-
-            {error && <p className="text-red-500 mt-4">{error}</p>}
-            {success && <p className="text-green-500 mt-4">{success}</p>}
-
-            <button
-              type="submit"
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Mettre à jour la Facturation
-            </button>
           </form>
         </div>
       </div>

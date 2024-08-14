@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import SideNavbar from '../SideNavbar';
 import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
+import SideNavbar from '../SideNavbar';
 
 const FacturationForm: React.FC = () => {
   const getCurrentDate = () => {
@@ -289,7 +289,7 @@ const FacturationForm: React.FC = () => {
                 />
               </div>
             </div>
-            <h1>Selectionner Produit Acheté :</h1>
+
             <div className="mt-4">
               <label className="block text-gray-700 mb-2">Ajouter un Médicament</label>
               <input
@@ -389,62 +389,28 @@ const FacturationForm: React.FC = () => {
           </form>
 
           <h2 className="text-2xl mt-10 mb-4 text-center font-semibold text-gray-700">Liste des Facturations</h2>
-          <table className=" min-w-full bg-white border border-gray-300 ">
+          <table className="min-w-full bg-white border border-gray-300">
             <thead>
               <tr>
                 <th className="px-4 py-2 border border-gray-300 text-left">Numéro de Facture</th>
                 <th className="px-4 py-2 border border-gray-300 text-left">Date</th>
                 <th className="px-4 py-2 border border-gray-300 text-left">Client</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Produit Acheté</th> 
                 <th className="px-4 py-2 border border-gray-300 text-left">Prix Consultation</th>
                 <th className="px-4 py-2 border border-gray-300 text-left">Prix Globale</th>
-                <th className="px-4 py-2 border border-gray-300 text-left">Status</th>
                 <th className="px-4 py-2 border border-gray-300 text-left">Actions</th>
               </tr>
             </thead>
-             <tbody>
+            <tbody>
 
-            
               
               {facturations.map(facturation => (
                 <tr key={facturation._id}>
                   <td className="px-4 py-2 border border-gray-300">{facturation.facture_n}</td>
                   <td className="px-4 py-2 border border-gray-300">{new Date(facturation.date).toLocaleDateString()}</td>
-                  <td className="px-4 py-2 border border-gray-300">{facturation.clientId ? `${facturation.clientId.firstname} ${facturation.clientId.lastname}` : ''}</td>
-                  <td className="px-4 py-2 border border-gray-300">
-  {facturation.medicamentId && facturation.produitalimentaireId && facturation.materielconsommableId ? (
-    <>
-      <div>{`${facturation.medicamentId.nom}(${facturation.medicamentId.prixVente}dt)`}</div>
-      <div>{`${facturation.produitalimentaireId.nom}(${facturation.produitalimentaireId.prixVente}dt)`}</div>
-      <div>{`${facturation.materielconsommableId.nom}(${facturation.materielconsommableId.prixVente}dt)`}</div>
-    </>
-  ) : (
-    <>
-      {facturation.medicamentId && (
-        <div>{`${facturation.medicamentId.nom}(${facturation.medicamentId.prixVente}dt)`}</div>
-      )}
-      {facturation.produitalimentaireId && (
-        <div>{`${facturation.produitalimentaireId.nom}(${facturation.produitalimentaireId.prixVente}dt)`}</div>
-      )}
-      {facturation.materielconsommableId && (
-        <div>{`${facturation.materielconsommableId.nom}(${facturation.materielconsommableId.prixVente}dt)`}</div>
-      )}
-    </>
-  )}
-</td>
- <td className="px-4 py-2 border border-gray-300">{facturation.prixConsultation}dt</td>
+                  <td className="px-4 py-2 border border-gray-300">{facturation.clientId ? `${facturation.clientId.firstname} ${facturation.clientId.lastname}`: ''}</td>
+                  <td className="px-4 py-2 border border-gray-300">{facturation.prixConsultation}dt</td>
                   <td className="px-4 py-2 border border-gray-300">{facturation.prixGlobale}dt</td>
-                  
-                  <td className="px-2 py-1 border border-gray-300"> 
-                     <div className="flex justify-center space-x-2">
-                    <button type="submit"
-                className="bg-red-500 text-white w-15 px-1 py-1 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-              >
-                Payement
-              </button>
-            </div></td>
-                 
-                 
+
                   <td className="px-4 py-2 border-b">
                       <div className="flex justify-center space-x-2">
                         <FaEye
