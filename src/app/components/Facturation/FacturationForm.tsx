@@ -173,6 +173,7 @@ const FacturationForm: React.FC = () => {
         prixGlobale,
       };
 
+
       const response = await axios.post(
         'http://localhost:3000/facturation',
         formData,
@@ -397,6 +398,7 @@ const FacturationForm: React.FC = () => {
                 <th className="px-4 py-2 border border-gray-300 text-left">Client</th>
                 <th className="px-4 py-2 border border-gray-300 text-left">Prix Consultation</th>
                 <th className="px-4 py-2 border border-gray-300 text-left">Prix Globale</th>
+                <th className="px-4 py-2 border border-gray-300 text-left">Status</th>
                 <th className="px-4 py-2 border border-gray-300 text-left">Actions</th>
               </tr>
             </thead>
@@ -410,7 +412,14 @@ const FacturationForm: React.FC = () => {
                   <td className="px-4 py-2 border border-gray-300">{facturation.clientId ? `${facturation.clientId.firstname} ${facturation.clientId.lastname}`: ''}</td>
                   <td className="px-4 py-2 border border-gray-300">{facturation.prixConsultation}dt</td>
                   <td className="px-4 py-2 border border-gray-300">{facturation.prixGlobale}dt</td>
-
+                  <td className="px-4 py-2 border border-gray-300">
+          <button
+            className="bg-green-500 text-white px-3 py-1 rounded"
+            onClick={() => handlePayment(facturation._id)}
+          >
+            Payer
+          </button>
+        </td>
                   <td className="px-4 py-2 border-b">
                       <div className="flex justify-center space-x-2">
                         <FaEye

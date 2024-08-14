@@ -81,8 +81,8 @@ const UpdateFacturationForm: React.FC = () => {
           facture_n: facturation.facture_n,
           date: facturation.date ? facturation.date.slice(0, 10) : '',
           clientId: facturation.clientId?._id || '',
-          clientAdresse: facturation.clientAdresse || '',
-          clientTel: facturation.clientTel || '',
+          clientAdresse: facturation.clientId?.adresse || '',
+          clientTel: facturation.clientId?.tel || '',
           medicamentId: facturation.medicamentId || '',
           produitalimentaireId: facturation.produitalimentaireId || '',
           materielconsommableId: facturation.materielconsommableId || '',
@@ -94,7 +94,7 @@ const UpdateFacturationForm: React.FC = () => {
         setClients(clientsRes.data);
 
         setSelectedOptions({
-          medicament: !!facturation.medicamentId,
+          medicament: !!facturation.medicamentId?.nom || '',
           produitalimentaire: !!facturation.produitalimentaireId,
           materielconsommable: !!facturation.materielconsommableId,
         });
@@ -183,7 +183,7 @@ const UpdateFacturationForm: React.FC = () => {
       );
 
       setSuccess('Facturation mise à jour avec succès.');
-      router.push('/facturation');
+      router.push('/addfacturation');
     } catch (error) {
       console.error('Error details:', error.response?.data || error.message);
       setError("Erreur lors de la mise à jour de la facturation. Veuillez réessayer.");

@@ -27,6 +27,7 @@ interface Facturation {
   clientId: Client;
   prixConsultation: number;
   prixGlobale: number;
+  isPaid: boolean; // Ajouter un champ pour indiquer si la facture est payée
   medicament?: {
     medicamentId: string;
     nom: string;
@@ -46,6 +47,7 @@ const DetailsFacturation: React.FC = () => {
   const [facturation, setFacturation] = useState<Facturation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isPaid, setIsPaid] = useState<boolean>(false); // État pour le statut de paiement
   const router = useRouter();
   const { id } = useParams();
   const printRef = useRef<HTMLDivElement>(null);
@@ -69,6 +71,7 @@ const DetailsFacturation: React.FC = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setFacturation(response.data);
+        setIsPaid(response.data.isPaid); // Initialiser le statut de paiement
       } catch (error) {
         setError('Erreur lors du chargement des données.');
       }
@@ -77,28 +80,9 @@ const DetailsFacturation: React.FC = () => {
     if (id) fetchFacturation();
   }, [id]);
 
-  const handleEditFacturation = (id: string) => {
-    console.log(`Edit facturation ${id}`);
-    router.push(`/edit-facturation/${id}`);
-  };
-
-  const handleDeleteFacturation = async (id: string) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('Token non trouvé. Veuillez vous reconnecter.');
-      return;
-    }
-
-    try {
-      await axios.delete(`http://localhost:3000/facturation/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSuccess('Facturation supprimée avec succès.');
-      setFacturation(null);
-    } catch (error) {
-      console.error('Error details:', error.response?.data || error.message);
-      setError('Erreur lors de la suppression de la facturation. Veuillez réessayer.');
-    }
+  const handleMarkAsPaid = () => {
+    setIsPaid(true); // Marquer comme payé
+    setSuccess('La facture a été marquée comme payée.');
   };
 
   const handlePrint = useReactToPrint({
@@ -129,7 +113,7 @@ const DetailsFacturation: React.FC = () => {
           {facturation && (
             <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-10" ref={printRef}>
               <h2 className="text-3xl font-bold mb-20 text-blue-900">FACTURE 2024-XX</h2>
-             
+
               <div className="mb-10 grid grid-cols-2 gap-10">
                 <div>
                   <h3 className="font-semibold text-gray-700">Adressé à</h3>
@@ -144,7 +128,7 @@ const DetailsFacturation: React.FC = () => {
                   <p>Contact: {defaultMedecin.tel}</p>
                 </div>
               </div>
-              
+
               <div className="mb-6 flex justify-between items-center">
                 <div>
                   <p>Créé le</p>
@@ -155,7 +139,7 @@ const DetailsFacturation: React.FC = () => {
                   <p>{new Date(facturation.date).toLocaleDateString()}</p>
                 </div>
               </div>
-              
+
               <table className="min-w-full bg-white border border-gray-200">
                 <thead>
                   <tr>
@@ -173,71 +157,78 @@ const DetailsFacturation: React.FC = () => {
                     <td className="px-4 py-2 border-b text-right">{facturation.prixConsultation.toFixed(2)} dt</td>
                   </tr>
 
-                  {facturation.medicamentId && (
+                  {facturation.medicament && (
                     <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-2 border-b">{facturation.medicamentId.nom}</td>
+                      <td className="px-4 py-2 border-b">{facturation.medicament.nom}</td>
                       <td className="px-4 py-2 border-b text-right">1</td>
                       <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.medicamentId.prixVente).toFixed(2)} dt
+                        {Number(facturation.medicament.prixVente).toFixed(2)} dt
                       </td>
                       <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.medicamentId.prixVente).toFixed(2)} dt
+                        {Number(facturation.medicament.prixVente).toFixed(2)} dt
                       </td>
                     </tr>
                   )}
-                  
-                  {facturation.produitalimentaireId && (
+
+                  {facturation.produitalimentaire && (
                     <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-2 border-b">{facturation.produitalimentaireId.nom}</td>
+                      <td className="px-4 py-2 border-b">{facturation.produitalimentaire.nom}</td>
                       <td className="px-4 py-2 border-b text-right">1</td>
                       <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.produitalimentaireId.prixVente).toFixed(2)} dt
+                        {Number(facturation.produitalimentaire.prixVente).toFixed(2)} dt
                       </td>
                       <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.produitalimentaireId.prixVente).toFixed(2)} dt
+                        {Number(facturation.produitalimentaire.prixVente).toFixed(2)} dt
                       </td>
                     </tr>
                   )}
-                  
-                  {facturation.materielconsommableId && (
+
+                  {facturation.materielconsommable && (
                     <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-2 border-b">{facturation.materielconsommableId.nom}</td>
+                      <td className="px-4 py-2 border-b">{facturation.materielconsommable.nom}</td>
                       <td className="px-4 py-2 border-b text-right">1</td>
                       <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.materielconsommableId.prixVente).toFixed(2)} dt
+                        {Number(facturation.materielconsommable.prixVente).toFixed(2)} dt
                       </td>
                       <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.materielconsommableId.prixVente).toFixed(2)} dt
+                        {Number(facturation.materielconsommable.prixVente).toFixed(2)} dt
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
-              
-              <div className="flex justify-end mt-8">
-                <div className="text-right">
-                  <p className="font-semibold">Montant Total:</p>
-                  <p className="text-xl font-bold text-gray-900">{facturation.prixGlobale.toFixed(2)} dt</p>
-                </div>
+
+              <div className="mt-6 flex justify-between">
+                <p className="text-gray-800 font-bold">Prix total: {facturation.prixGlobale.toFixed(2)} dt</p>
+              </div>
+
+              <div className="mt-6 flex justify-between">
+                <p className={`font-bold ${isPaid ? 'text-green-600' : 'text-red-600'}`}>
+                  Statut de paiement: {isPaid ? 'Payée' : 'Non payée'}
+                </p>
+                {!isPaid && (
+                  <button onClick={handleMarkAsPaid} className="bg-green-500 text-white py-2 px-4 rounded">
+                    Marquer comme payée
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-10 flex justify-end space-x-4">
+                <button
+                  onClick={handleDownloadPDF}
+                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+                >
+                  Télécharger PDF
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded"
+                >
+                  Imprimer
+                </button>
               </div>
             </div>
           )}
-          
-          <div className="mt-6 flex justify-center space-x-4 print-hidden">
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={handlePrint}
-            >
-              Imprimer
-            </button>
-            <button
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-              onClick={handleDownloadPDF}
-            >
-              Télécharger PDF
-            </button>
-            
-          </div>
         </div>
       </div>
     </div>
