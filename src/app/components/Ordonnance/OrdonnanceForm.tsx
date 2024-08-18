@@ -155,7 +155,7 @@ const OrdonnanceForm: React.FC = () => {
               <div>
                 <label className="block text-gray-700 mb-2">Dosage</label>
                 <input
-                  type="number"
+                  type="text"
                   name="dosage"
                   value={form.dosage}
                   onChange={handleChange}

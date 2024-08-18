@@ -1,5 +1,6 @@
 'use client';
-import OrdonnanceDetails from '@/app/components/Ordonnance/[id]';
+
+import OrdonnanceDetails from '@/app/components/Ordonnance/OrdonnanceDetails';
 import React from 'react';
 
 

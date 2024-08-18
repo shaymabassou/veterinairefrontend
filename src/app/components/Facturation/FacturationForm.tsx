@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaEye, FaTrash , FaCheck} from 'react-icons/fa';
 import SideNavbar from '../SideNavbar';
 
 const FacturationForm: React.FC = () => {
@@ -40,6 +40,8 @@ const FacturationForm: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [facturations, setFacturations] = useState<any[]>([]);
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,6 +83,7 @@ const FacturationForm: React.FC = () => {
     fetchData();
   }, []);
 
+  
   useEffect(() => {
     let total = parseFloat(form.prixConsultation) || 0;
 
@@ -107,6 +110,7 @@ const FacturationForm: React.FC = () => {
       ...selectedOptions,
       [e.target.name]: e.target.checked,
     });
+    
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -208,6 +212,40 @@ const FacturationForm: React.FC = () => {
     const item = list.find(i => i._id === id);
     return item ? item.prixVente : 0;
   };
+
+  const handleMarkAsPaid = async (id: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Token non trouvé. Veuillez vous reconnecter.');
+      return;
+    }
+
+    setLoading(true);  // Activer l'état de chargement avant de commencer la requête
+
+    try {
+      await axios.patch(`http://localhost:3000/facturation/${id}/pay`, {
+        status: 'payé',
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      setFacturations(prevFacturations =>
+        prevFacturations.map(facturation =>
+          facturation._id === id ? { ...facturation, status: 'payé' } : facturation
+        )
+      );
+      setSuccess('Statut de la facturation mis à jour avec succès.');
+    } catch (error) {
+      console.error('Error details:', error.response?.data || error.message);
+      setError("Erreur lors de la mise à jour du statut de la facturation. Veuillez réessayer.");
+    } finally {
+      setLoading(false);  // Désactiver l'état de chargement après la fin de la requête
+    }
+  };
+
+
 
   return (
     <div className="min-h-screen flex">
@@ -412,35 +450,40 @@ const FacturationForm: React.FC = () => {
                   <td className="px-4 py-2 border border-gray-300">{facturation.clientId ? `${facturation.clientId.firstname} ${facturation.clientId.lastname}`: ''}</td>
                   <td className="px-4 py-2 border border-gray-300">{facturation.prixConsultation}dt</td>
                   <td className="px-4 py-2 border border-gray-300">{facturation.prixGlobale}dt</td>
+                
                   <td className="px-4 py-2 border border-gray-300">
-          <button
-            className="bg-green-500 text-white px-3 py-1 rounded"
-            onClick={() => handlePayment(facturation._id)}
-          >
-            Payer
-          </button>
-        </td>
-                  <td className="px-4 py-2 border-b">
-                      <div className="flex justify-center space-x-2">
-                        <FaEye
-                          className="text-blue-500 cursor-pointer"
-                          onClick={() => handleViewFacturation(facturation._id)}
-                        />
-                        <FaEdit
-                          className="text-green-500 cursor-pointer"
-                          onClick={() => handleEditFacturation(facturation._id)}
-                        />
-                        <FaTrash
-                          className="text-red-500 cursor-pointer"
-                          onClick={() => handleDeleteFacturation(facturation._id)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+  {facturation.status === 'payée' ? (
+    <span className="text-green-500 font-semibold">Payée</span>
+  ) : (
+    <span className="text-red-500 font-semibold">Impayée</span>
+  )}
+</td>
+<td className="px-4 py-2 border-b">
+  <div className="flex justify-center space-x-2">
+    <FaEye
+      className="text-blue-500 cursor-pointer"
+      onClick={() => handleViewFacturation(facturation._id)}
+    />
+    <FaEdit
+      className="text-green-500 cursor-pointer"
+      onClick={() => handleEditFacturation(facturation._id)}
+    />
+    <FaTrash
+      className="text-red-500 cursor-pointer"
+      onClick={() => handleDeleteFacturation(facturation._id)}
+    />
+    {facturation.status !== 'payée' && (
+      <FaCheck
+          className={`text-green-500 cursor-pointer ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={() => !loading && handleMarkAsPaid(facturation._id)}
+        />
+    )}
+  </div>
+</td>
+ </tr> ))}
+  </tbody>
+  </table>
+    </div>
         </div>
       </div>
     );

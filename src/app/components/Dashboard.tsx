@@ -18,7 +18,7 @@ const Dashboard: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchData = async (url: string, setter: { (value: React.SetStateAction<never[]>): void; (value: React.SetStateAction<never[]>): void; (value: React.SetStateAction<never[]>): void; (value: React.SetStateAction<never[]>): void; (value: React.SetStateAction<never[]>): void; (arg0: any): void; }) => {
+    const fetchData = async (url: string, setter: (data: any) => void) => {
       const token = localStorage.getItem('token');
       if (!token) {
         setError('Token non trouvé. Veuillez vous reconnecter.');
@@ -77,39 +77,60 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-[#e6f5f2]">
       <SideNavbar />
       <main className="flex-grow p-6 ml-64">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-semibold text-gray-800">Dashboard</h1>
-        </div>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Statistiques</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-4 shadow-lg rounded-lg bg-white">
-              <Bar 
-                data={chartData(
-                  ['Clients', 'Animaux'], 
-                  [clientCount, animalCount], 
-                  ['rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)']
-                )} 
-              />
-            </div>
-            <div className="p-4 shadow-lg rounded-lg bg-white">
-              <Bar 
-                data={chartData(
-                  ['Médicaments', 'Produit Alimentaires', 'Matériel Consommables'], 
-                  [medicamentCount, produitAlimentaireCount, materielConsommableCount], 
-                  ['rgba(255, 159, 64, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)']
-                )} 
-              />
-            </div>
+          <div className="flex items-center">
+            {/* <input 
+              type="text" 
+              placeholder="Search anything..." 
+              className="rounded-full border-gray-300 px-4 py-2 w-64 mr-4"
+            />
+            <button className="text-white bg-[#34a853] hover:bg-[#2e8b57] px-6 py-2 rounded-lg">Add Record</button> */}
           </div>
         </div>
-        <div className="mb-6">
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="p-4 shadow-lg rounded-lg bg-white text-center">
+            <h2 className="text-2xl font-semibold text-gray-800">Total Patients</h2>
+            <p className="text-4xl font-bold text-gray-800">{clientCount}</p>
+          </div>
+          <div className="p-4 shadow-lg rounded-lg bg-white text-center">
+            <h2 className="text-2xl font-semibold text-gray-800">Total Animals</h2>
+            <p className="text-4xl font-bold text-gray-800">{animalCount}</p>
+          </div>
+          <div className="p-4 shadow-lg rounded-lg bg-white text-center">
+            <h2 className="text-2xl font-semibold text-gray-800">Total Medications</h2>
+            <p className="text-4xl font-bold text-gray-800">{medicamentCount}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-4 shadow-lg rounded-lg bg-white">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Statistiques</h2>
+            <Bar 
+              data={chartData(
+                ['Clients', 'Animaux'], 
+                [clientCount, animalCount], 
+                ['rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)']
+              )} 
+            />
+          </div>
+          <div className="p-4 shadow-lg rounded-lg bg-white">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Stock Items</h2>
+            <Bar 
+              data={chartData(
+                ['Médicaments', 'Produit Alimentaires', 'Matériel Consommables'], 
+                [medicamentCount, produitAlimentaireCount, materielConsommableCount], 
+                ['rgba(255, 159, 64, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)']
+              )} 
+            />
+          </div>
+        </div>
+        <div className="mt-6 p-4 shadow-lg rounded-lg bg-white">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Répartition</h2>
-          <div className="p-4 shadow-lg rounded-lg bg-white max-w-sm mx-auto">
+          <div className="max-w-xs mx-auto">
             <Doughnut data={doughnutData} />
           </div>
         </div>

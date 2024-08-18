@@ -58,8 +58,8 @@ const ListOrdonnanceForm: React.FC = () => {
     router.push('/addordonnance');
   };
 
-  const handleOrdonnanceClick = (ordonnanceId: string) => {
-    router.push(`/ordonnance/${ordonnanceId}`);
+  const handleOrdonnanceClick = (id: string) => {
+    router.push(`/ordonnance/${id}`);
   };
 
   const handleDeleteOrdonnance = async (id: string) => {
@@ -132,7 +132,7 @@ const ListOrdonnanceForm: React.FC = () => {
                   </td>
                   <td className="px-4 py-2 border border-gray-300">
                     <div className="flex space-x-2"> 
-                     {/* <button
+                     <button
                         className="flex items-center border border-blue-500 text-blue-500 px-2 py-1 rounded-md shadow-md hover:bg-blue-100"
                         onClick={(event) => {
                           event.stopPropagation();
@@ -140,7 +140,7 @@ const ListOrdonnanceForm: React.FC = () => {
                         }}
                       > 
                          <FaEye />
-                       </button>  */}
+                       </button> 
                       <button
                         className="flex items-center border border-green-500 text-green-500 px-2 py-1 rounded-md shadow-md hover:bg-green-100"
                         onClick={(event) => {

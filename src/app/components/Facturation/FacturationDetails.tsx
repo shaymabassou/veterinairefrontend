@@ -5,6 +5,8 @@ import SideNavbar from '../SideNavbar';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import html2pdf from 'html2pdf.js';
 import { useReactToPrint } from 'react-to-print';
+import Image from 'next/image';
+
 
 interface Client {
   _id: string;
@@ -27,7 +29,7 @@ interface Facturation {
   clientId: Client;
   prixConsultation: number;
   prixGlobale: number;
-  isPaid: boolean; // Ajouter un champ pour indiquer si la facture est payée
+  isPaid: boolean;
   medicament?: {
     medicamentId: string;
     nom: string;
@@ -47,7 +49,6 @@ const DetailsFacturation: React.FC = () => {
   const [facturation, setFacturation] = useState<Facturation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [isPaid, setIsPaid] = useState<boolean>(false); // État pour le statut de paiement
   const router = useRouter();
   const { id } = useParams();
   const printRef = useRef<HTMLDivElement>(null);
@@ -71,7 +72,6 @@ const DetailsFacturation: React.FC = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setFacturation(response.data);
-        setIsPaid(response.data.isPaid); // Initialiser le statut de paiement
       } catch (error) {
         setError('Erreur lors du chargement des données.');
       }
@@ -80,9 +80,28 @@ const DetailsFacturation: React.FC = () => {
     if (id) fetchFacturation();
   }, [id]);
 
-  const handleMarkAsPaid = () => {
-    setIsPaid(true); // Marquer comme payé
-    setSuccess('La facture a été marquée comme payée.');
+  const handleEditFacturation = (id: string) => {
+    console.log(`Edit facturation ${id}`);
+    router.push(`/edit-facturation/${id}`);
+  };
+
+  const handleDeleteFacturation = async (id: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Token non trouvé. Veuillez vous reconnecter.');
+      return;
+    }
+
+    try {
+      await axios.delete(`http://localhost:3000/facturation/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSuccess('Facturation supprimée avec succès.');
+      setFacturation(null);
+    } catch (error) {
+      console.error('Error details:', error.response?.data || error.message);
+      setError('Erreur lors de la suppression de la facturation. Veuillez réessayer.');
+    }
   };
 
   const handlePrint = useReactToPrint({
@@ -91,6 +110,7 @@ const DetailsFacturation: React.FC = () => {
 
   const handleDownloadPDF = () => {
     const element = printRef.current;
+    
     const opt = {
       margin: 1,
       filename: `facture_${facturation?.facture_n || '2024-XX'}.pdf`,
@@ -112,24 +132,39 @@ const DetailsFacturation: React.FC = () => {
           {success && <div className="mt-4 text-green-600 text-center">{success}</div>}
           {facturation && (
             <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-10" ref={printRef}>
-              <h2 className="text-3xl font-bold mb-20 text-blue-900">FACTURE 2024-XX</h2>
-
-              <div className="mb-10 grid grid-cols-2 gap-10">
-                <div>
-                  <h3 className="font-semibold text-gray-700">Adressé à</h3>
-                  <p>{facturation.clientId.firstname} {facturation.clientId.lastname}</p>
-                  <p>{facturation.clientId.adresse}</p>
-                  <p>Contact: {facturation.clientId.tel}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-700">De</h3>
-                  <p>{defaultMedecin.name}</p>
-                  <p>{defaultMedecin.adresse}</p>
-                  <p>Contact: {defaultMedecin.tel}</p>
-                </div>
+              {/* <h2 className="text-3xl font-bold mb-20 text-blue-900">FACTURE 2024-XX</h2> */}
+             
+              <div className="flex justify-center mr-100 mb-10">
+                <Image
+                  src="/images/sym.jpg" // Path to your image in the public directory
+                  alt="Facture Symbol"
+                  width={100}
+                  height={100}
+                />
               </div>
-
-              <div className="mb-6 flex justify-between items-center">
+              <h2 className="text-3xl mb-20 text-black-900">FACTURE 2024-XX</h2>
+              <div className="mb-10 grid grid-cols-2 gap-10">
+  <div>
+    <h3 className="font-semibold text-gray-700">Adressé à</h3>
+    <p>{facturation.clientId.firstname} {facturation.clientId.lastname}</p>
+    <p>{facturation.clientId.adresse}</p>
+    <p>Contact: {facturation.clientId.tel}</p>
+  </div>
+  <div className="flex justify-between items-center">
+    <div>
+      <h3 className="font-semibold text-gray-700">De</h3>
+      <p>{defaultMedecin.name}</p>
+      <p>{defaultMedecin.adresse}</p>
+      <p>Contact: {defaultMedecin.tel}</p>
+    </div>
+    <div>
+      <p className={`text-xl font-bold ${facturation.status === 'payée' ? 'text-green-500' : 'text-red-500'}`}>
+        {facturation.status}
+      </p>
+    </div>
+  </div>
+</div>
+<div className="mb-6 flex justify-between items-center">
                 <div>
                   <p>Créé le</p>
                   <p>{new Date(facturation.date).toLocaleDateString()}</p>
@@ -139,7 +174,7 @@ const DetailsFacturation: React.FC = () => {
                   <p>{new Date(facturation.date).toLocaleDateString()}</p>
                 </div>
               </div>
-
+              
               <table className="min-w-full bg-white border border-gray-200">
                 <thead>
                   <tr>
@@ -157,75 +192,81 @@ const DetailsFacturation: React.FC = () => {
                     <td className="px-4 py-2 border-b text-right">{facturation.prixConsultation.toFixed(2)} dt</td>
                   </tr>
 
-                  {facturation.medicament && (
+                  {facturation.medicamentId && (
                     <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-2 border-b">{facturation.medicament.nom}</td>
+                      <td className="px-4 py-2 border-b">{facturation.medicamentId.nom}</td>
                       <td className="px-4 py-2 border-b text-right">1</td>
                       <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.medicament.prixVente).toFixed(2)} dt
+                        {Number(facturation.medicamentId.prixVente).toFixed(2)} dt
                       </td>
                       <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.medicament.prixVente).toFixed(2)} dt
+                        {Number(facturation.medicamentId.prixVente).toFixed(2)} dt
+                      </td>
+                    </tr>
+                  )}
+                  
+                  {facturation.produitalimentaireId && (
+                    <tr className="hover:bg-gray-50">
+                      <td className="px-4 py-2 border-b">{facturation.produitalimentaireId.nom}</td>
+                      <td className="px-4 py-2 border-b text-right">1</td>
+                      <td className="px-4 py-2 border-b text-right">
+                        {Number(facturation.produitalimentaireId.prixVente).toFixed(2)} dt
+                      </td>
+                      <td className="px-4 py-2 border-b text-right">
+                        {Number(facturation.produitalimentaireId.prixVente).toFixed(2)} dt
                       </td>
                     </tr>
                   )}
 
-                  {facturation.produitalimentaire && (
+                  {facturation.materielconsommableId && (
                     <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-2 border-b">{facturation.produitalimentaire.nom}</td>
+                      <td className="px-4 py-2 border-b">{facturation.materielconsommableId.nom}</td>
                       <td className="px-4 py-2 border-b text-right">1</td>
                       <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.produitalimentaire.prixVente).toFixed(2)} dt
+                        {Number(facturation.materielconsommableId.prixVente).toFixed(2)} dt
                       </td>
                       <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.produitalimentaire.prixVente).toFixed(2)} dt
-                      </td>
-                    </tr>
-                  )}
-
-                  {facturation.materielconsommable && (
-                    <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-2 border-b">{facturation.materielconsommable.nom}</td>
-                      <td className="px-4 py-2 border-b text-right">1</td>
-                      <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.materielconsommable.prixVente).toFixed(2)} dt
-                      </td>
-                      <td className="px-4 py-2 border-b text-right">
-                        {Number(facturation.materielconsommable.prixVente).toFixed(2)} dt
+                        {Number(facturation.materielconsommableId.prixVente).toFixed(2)} dt
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
 
-              <div className="mt-6 flex justify-between">
-                <p className="text-gray-800 font-bold">Prix total: {facturation.prixGlobale.toFixed(2)} dt</p>
+              <div className="flex justify-end mt-4">
+                <div className="w-1/3">
+                  <div className="flex justify-between">
+                    <p className="text-gray-600">Montant Total HT:</p>
+                    <p>{facturation.prixGlobale.toFixed(2)} dt</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <p className="text-gray-600">TVA (%):</p>
+                    <p>{(facturation.prixGlobale * 0).toFixed(2)} dt</p>
+                  </div>
+                  <div className="flex justify-between">
+                    <p className="text-gray-600 font-bold">Montant Total TTC:</p>
+                    <p className="font-bold">{(facturation.prixGlobale * 1).toFixed(2)} dt</p>
+                  </div>
+                </div>
               </div>
-
-              <div className="mt-6 flex justify-between">
-                <p className={`font-bold ${isPaid ? 'text-green-600' : 'text-red-600'}`}>
-                  Statut de paiement: {isPaid ? 'Payée' : 'Non payée'}
-                </p>
-                {!isPaid && (
-                  <button onClick={handleMarkAsPaid} className="bg-green-500 text-white py-2 px-4 rounded">
-                    Marquer comme payée
+              <div className="mt-6 flex justify-center space-x-4 print:hidden">
+              <div>
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded shadow-md hover:bg-blue-600"
+                    onClick={handlePrint}
+                  >
+                    Imprimer
                   </button>
-                )}
-              </div>
-
-              <div className="mt-10 flex justify-end space-x-4">
-                <button
-                  onClick={handleDownloadPDF}
-                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-                >
-                  Télécharger PDF
-                </button>
-                <button
-                  onClick={handlePrint}
-                  className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded"
-                >
-                  Imprimer
-                </button>
+                  {/* <button
+                    className="ml-4 bg-green-500 text-white px-4 py-2 rounded shadow-md hover:bg-green-600"
+                    onClick={handleDownloadPDF}
+                  >
+                    Télécharger PDF
+                  </button> */}
+                </div>
+                <div className="flex space-x-4">
+                  
+                </div>
               </div>
             </div>
           )}
