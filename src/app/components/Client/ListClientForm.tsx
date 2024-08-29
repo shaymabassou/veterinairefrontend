@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import SideNavbar from '../SideNavbar';
@@ -46,11 +46,13 @@ const ListClientForm: React.FC = () => {
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+    setCurrentPage(1); 
   };
 
-  const filteredClients = clients.filter(client =>
+  const filteredClients =  useMemo(() => 
+    clients.filter(client =>
     `${client.firstname} ${client.lastname}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ), [clients, searchTerm]);
 
   const handleAddClientClick = () => {
     router.push('/addclient');
@@ -81,6 +83,25 @@ const ListClientForm: React.FC = () => {
       }
     }
   };
+
+  // Pagination state
+ const [currentPage, setCurrentPage] = useState(1);
+ const itemsPerPage =5;
+
+ // Calculate the total number of pages
+ const totalPages = Math.ceil(clients.length / itemsPerPage);
+
+ // Get the current items to display
+ const currentItems = useMemo(() => 
+  filteredClients.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  ), [filteredClients, currentPage]);
+
+ // Handle page change
+ const handlePageChange = (page) => {
+   setCurrentPage(page);
+ };
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -119,7 +140,7 @@ const ListClientForm: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredClients.map((client) => (
+            {currentItems.map((client) => (
                 <tr key={client._id} className="hover:bg-gray-100 cursor-pointer border-b border-gray-300">
                   <td className="px-4 py-2 border-r border-gray-300 flex items-center" onClick={() => handleClientClick(client._id)}>
                     <MdPerson className="mr-2" /> {client.firstname}
@@ -156,6 +177,20 @@ const ListClientForm: React.FC = () => {
               ))}
             </tbody>
           </table>
+
+          <div className="flex justify-center mt-6">
+  {Array.from({ length: totalPages }, (_, index) => (
+    <button
+      key={index}
+      onClick={() => handlePageChange(index + 1)}
+      className={`px-3 py-1 mx-1 ${
+        currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+      } rounded`}
+    >
+      {index + 1}
+    </button>
+  ))}
+</div>
         </div>
       </main>
     </div>

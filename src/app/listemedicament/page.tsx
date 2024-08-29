@@ -4,8 +4,7 @@ import ListMedicamentForm from '../components/Medicament/ListMedicamentForm';
 
 const ListMedicamentPage: React.FC = () => {
   return (
-    
-    <div>
+   <div>
       <ListMedicamentForm />
     </div>
   );

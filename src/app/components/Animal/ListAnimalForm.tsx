@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import SideNavbar from '../SideNavbar';
@@ -48,11 +48,13 @@ const ListAnimalForm: React.FC = () => {
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+    setCurrentPage(1); 
   };
 
-  const filteredAnimals = animals.filter(animal =>
+  const filteredAnimals =  useMemo(() => 
+    animals.filter(animal =>
     `${animal.nom} ${animal.espece}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ), [animals, searchTerm]);
 
   const handleAddAnimalClick = () => {
     router.push('/addanimal');
@@ -83,6 +85,25 @@ const ListAnimalForm: React.FC = () => {
       }
     }
   };
+
+  // Pagination state
+ const [currentPage, setCurrentPage] = useState(1);
+ const itemsPerPage =5;
+
+ // Calculate the total number of pages
+ const totalPages = Math.ceil(animals.length / itemsPerPage);
+
+ // Get the current items to display
+ const currentItems = useMemo(() => 
+  filteredAnimals.slice(
+   (currentPage - 1) * itemsPerPage,
+   currentPage * itemsPerPage
+  ), [filteredAnimals, currentPage]);
+
+ // Handle page change
+ const handlePageChange = (page) => {
+   setCurrentPage(page);
+ };
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -124,7 +145,7 @@ const ListAnimalForm: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredAnimals.map((animal) => (
+            {currentItems.map((animal) => (
                 <tr key={animal._id} className="hover:bg-gray-100 cursor-pointer">
                   <td className="px-4 py-2 border border-gray-300">{animal.numero_de_fiche}</td>
                   <td className="px-4 py-2 border border-gray-300">{animal.nom}</td>
@@ -169,6 +190,20 @@ const ListAnimalForm: React.FC = () => {
               ))}
             </tbody>
           </table>
+
+          <div className="flex justify-center mt-6">
+  {Array.from({ length: totalPages }, (_, index) => (
+    <button
+      key={index}
+      onClick={() => handlePageChange(index + 1)}
+      className={`px-3 py-1 mx-1 ${
+        currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+      } rounded`}
+    >
+      {index + 1}
+    </button>
+  ))}
+</div>
         </div>
       </main>
     </div>

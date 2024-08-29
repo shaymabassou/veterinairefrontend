@@ -80,24 +80,24 @@ const UpdateFacturationForm: React.FC = () => {
           prixConsultation: facturation.prixConsultation,
           facture_n: facturation.facture_n,
           date: facturation.date ? facturation.date.slice(0, 10) : '',
-          clientId: facturation.clientId?._id || '',
+          clientId: facturation.clientId?._id || null,
           clientAdresse: facturation.clientId?.adresse || '',
           clientTel: facturation.clientId?.tel || '',
-          medicamentId: facturation.medicamentId || '',
-          produitalimentaireId: facturation.produitalimentaireId || '',
-          materielconsommableId: facturation.materielconsommableId || '',
+          medicamentId: facturation.medicamentId?._id || null,
+  produitalimentaireId: facturation.produitalimentaireId?._id || null,
+  materielconsommableId: facturation.materielconsommableId?._id || null,
         });
 
         setMedicaments(medicamentRes.data);
         setProduitalimentaires(produitAlimentaireRes.data);
         setMaterielconsommables(materielConsommableRes.data);
         setClients(clientsRes.data);
-
         setSelectedOptions({
-          medicament: !!facturation.medicamentId?.nom || '',
-          produitalimentaire: !!facturation.produitalimentaireId,
-          materielconsommable: !!facturation.materielconsommableId,
+          medicament: !!facturation.medicamentId, // true si medicamentId existe, false sinon
+          produitalimentaire: !!facturation.produitalimentaireId, // true si produitalimentaireId existe, false sinon
+          materielconsommable: !!facturation.materielconsommableId, // true si materielconsommableId existe, false sinon
         });
+        
       } catch (error) {
         setError('Erreur lors du chargement des données.');
       }
@@ -108,24 +108,34 @@ const UpdateFacturationForm: React.FC = () => {
 
   useEffect(() => {
     let total = parseFloat(form.prixConsultation) || 0;
-
+  
     if (selectedOptions.medicament && form.medicamentId) {
       const selectedMedicament = medicaments.find(m => m._id === form.medicamentId);
-      if (selectedMedicament) total += selectedMedicament.prixVente || 0;
+      if (selectedMedicament) total += parseFloat(selectedMedicament.prixVente) || 0;
     }
-
+  
     if (selectedOptions.produitalimentaire && form.produitalimentaireId) {
       const selectedProduitAlimentaire = produitalimentaires.find(p => p._id === form.produitalimentaireId);
-      if (selectedProduitAlimentaire) total += selectedProduitAlimentaire.prixVente || 0;
+      if (selectedProduitAlimentaire) total += parseFloat(selectedProduitAlimentaire.prixVente) || 0;
     }
-
+  
     if (selectedOptions.materielconsommable && form.materielconsommableId) {
       const selectedMaterielConsommable = materielconsommables.find(m => m._id === form.materielconsommableId);
-      if (selectedMaterielConsommable) total += selectedMaterielConsommable.prixVente || 0;
+      if (selectedMaterielConsommable) total += parseFloat(selectedMaterielConsommable.prixVente) || 0;
     }
-
+  
     setPrixGlobale(total);
-  }, [form, selectedOptions, medicaments, produitalimentaires, materielconsommables]);
+  }, [
+    form.prixConsultation,
+    form.medicamentId,
+    form.produitalimentaireId,
+    form.materielconsommableId,
+    selectedOptions,
+    medicaments,
+    produitalimentaires,
+    materielconsommables,
+  ]);
+  
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedOptions({
@@ -314,6 +324,7 @@ const UpdateFacturationForm: React.FC = () => {
                     name="medicamentId"
                     value={form.medicamentId}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Sélectionner un médicament</option>
@@ -335,9 +346,9 @@ const UpdateFacturationForm: React.FC = () => {
                     className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Sélectionner un produit alimentaire</option>
-                    {produitalimentaires.map(p => (
-                      <option key={p._id} value={p._id}>
-                        {p.nom} (Prix: {p.prixVente})
+                    {produitalimentaires.map(produit => (
+                      <option key={produit._id} value={produit._id}>
+                        {produit.nom} (Prix: {produit.prixVente})
                       </option>
                     ))}
                   </select>
@@ -353,20 +364,20 @@ const UpdateFacturationForm: React.FC = () => {
                     className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Sélectionner un matériel consommable</option>
-                    {materielconsommables.map(m => (
-                      <option key={m._id} value={m._id}>
-                        {m.nom} (Prix: {m.prixVente})
+                    {materielconsommables.map(materiel => (
+                      <option key={materiel._id} value={materiel._id}>
+                        {materiel.nom} (Prix: {materiel.prixVente})
                       </option>
                     ))}
                   </select>
                 </div>
               )}
-              
             </div>
-            <div className="flex justify-center">
+          
+            <div className="text-center">
               <button
                 type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                className="px-6 py-2 mt-4 text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 Mettre à jour
               </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import SideNavbar from '../SideNavbar';
@@ -48,11 +48,32 @@ const ListOrdonnanceForm: React.FC = () => {
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+    setCurrentPage(1); // Réinitialiser la page lors du changement de recherche
   };
 
-  const filteredOrdonnances = ordonnances.filter(ordonnance =>
-    `${ordonnance.nom} ${ordonnance.type}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredOrdonnances = useMemo(() => 
+    ordonnances.filter(ordonnance =>
+      `${ordonnance.nom} ${ordonnance.type}`.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [ordonnances, searchTerm]);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(filteredOrdonnances.length / itemsPerPage);
+
+  // Get the current items to display
+  const currentItems = useMemo(() => 
+    filteredOrdonnances.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    ), [filteredOrdonnances, currentPage]);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleAddOrdonnanceClick = () => {
     router.push('/addordonnance');
@@ -121,7 +142,7 @@ const ListOrdonnanceForm: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredOrdonnances.map((ordonnance) => (
+              {currentItems.map((ordonnance) => (
                 <tr key={ordonnance._id} className="hover:bg-gray-100 cursor-pointer">
                   <td className="px-4 py-2 border border-gray-300">{ordonnance.nom}</td>
                   <td className="px-4 py-2 border border-gray-300">{ordonnance.type}</td>
@@ -132,15 +153,15 @@ const ListOrdonnanceForm: React.FC = () => {
                   </td>
                   <td className="px-4 py-2 border border-gray-300">
                     <div className="flex space-x-2"> 
-                     <button
+                      <button
                         className="flex items-center border border-blue-500 text-blue-500 px-2 py-1 rounded-md shadow-md hover:bg-blue-100"
                         onClick={(event) => {
                           event.stopPropagation();
                           handleOrdonnanceClick(ordonnance._id);
                         }}
                       > 
-                         <FaEye />
-                       </button> 
+                        <FaEye />
+                      </button> 
                       <button
                         className="flex items-center border border-green-500 text-green-500 px-2 py-1 rounded-md shadow-md hover:bg-green-100"
                         onClick={(event) => {
@@ -165,6 +186,20 @@ const ListOrdonnanceForm: React.FC = () => {
               ))}
             </tbody>
           </table>
+
+          <div className="flex justify-center mt-6">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => handlePageChange(index + 1)}
+                className={`px-3 py-1 mx-1 ${
+                  currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                } rounded`}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
         </div>
       </main>
     </div>

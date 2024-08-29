@@ -44,8 +44,11 @@ const ListProduitAlimentaireForm: React.FC = () => {
     fetchProduitAlimentaires();
   }, []);
 
+  
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+    setCurrentPage(1);
   };
 
   const filteredProduitAlimentaires = produitAlimentaires.filter(produitAlimentaire =>
@@ -85,7 +88,7 @@ const ListProduitAlimentaireForm: React.FC = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Liste des Produits Alimentaires</h1>
           <button
-            className="relative w-12 h-12 rounded-md border-gray-500 text-gray-500 shadow-md hover:bg-gray-600 flex items-center justify-center"
+            className="relative w-12 h-12 rounded-md border-gray-300 text-gray-500 shadow-md hover:bg-gray-100 flex items-center justify-center"
             onClick={handleAddProduitAlimentaire}
           >
             <FaPlus className="text-xl" />

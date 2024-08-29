@@ -75,10 +75,10 @@ const MedicamentForm: React.FC = () => {
       );
       setSuccess('Médicament ajouté avec succès');
       router.push('/listemedicament');
-      
-    } catch (error: any) {
-      setError(`Échec de l'ajout du médicament : ${error.response?.data?.message || error.message}`);
+     } catch (error: any) {
+      setError(`Échec de l'ajout du médicament `);
       console.error('Error adding medicament:', error.response?.data || error.message);
+      // : ${error.response?.data?.message || error.message}
     }
   };
   
@@ -181,10 +181,7 @@ const MedicamentForm: React.FC = () => {
             {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
             {success && <p className="text-green-500 mb-4 text-center">{success}</p>}
 
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors duration-300"
-            >
+            <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors duration-50">
               Ajouter
             </button>
           </form>

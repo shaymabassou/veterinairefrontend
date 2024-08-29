@@ -3,6 +3,8 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend } from 'chart.js';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css'; // Import the calendar styles
 import SideNavbar from '../components/SideNavbar';
 
 // Register required components and scales
@@ -80,16 +82,9 @@ const Dashboard: React.FC = () => {
     <div className="flex min-h-screen bg-[#e6f5f2]">
       <SideNavbar />
       <main className="flex-grow p-6 ml-64">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-semibold text-gray-800">Dashboard</h1>
-          <div className="flex items-center">
-            {/* <input 
-              type="text" 
-              placeholder="Search anything..." 
-              className="rounded-full border-gray-300 px-4 py-2 w-64 mr-4"
-            />
-            <button className="text-white bg-[#34a853] hover:bg-[#2e8b57] px-6 py-2 rounded-lg">Add Record</button> */}
-          </div>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-800">Dashboard</h1>
+          <p className="text-gray-600">Aperçu des activités de votre clinique vétérinaire</p>
         </div>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -104,6 +99,14 @@ const Dashboard: React.FC = () => {
           <div className="p-4 shadow-lg rounded-lg bg-white text-center">
             <h2 className="text-2xl font-semibold text-gray-800">Total Medications</h2>
             <p className="text-4xl font-bold text-gray-800">{medicamentCount}</p>
+          </div>
+          <div className="p-4 shadow-lg rounded-lg bg-white text-center">
+            <h2 className="text-2xl font-semibold text-gray-800">Total Produit Alimentaires</h2>
+            <p className="text-4xl font-bold text-gray-800">{produitAlimentaireCount}</p>
+          </div>
+          <div className="p-4 shadow-lg rounded-lg bg-white text-center">
+            <h2 className="text-2xl font-semibold text-gray-800">Total Matériel Consommables</h2>
+            <p className="text-4xl font-bold text-gray-800">{materielConsommableCount}</p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -128,10 +131,16 @@ const Dashboard: React.FC = () => {
             />
           </div>
         </div>
-        <div className="mt-6 p-4 shadow-lg rounded-lg bg-white">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Répartition</h2>
-          <div className="max-w-xs mx-auto">
-            <Doughnut data={doughnutData} />
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-4 shadow-lg rounded-lg bg-white">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Répartition</h2>
+            <div className="max-w-xs mx-auto">
+              <Doughnut data={doughnutData} />
+            </div>
+          </div>
+          <div className="p-4 shadow-lg rounded-lg bg-white">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Calendrier</h2>
+            <Calendar />
           </div>
         </div>
       </main>

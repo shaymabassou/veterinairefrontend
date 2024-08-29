@@ -83,6 +83,25 @@ const FacturationForm: React.FC = () => {
     fetchData();
   }, []);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage =5;
+
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(facturations.length / itemsPerPage);
+
+  // Get the current items to display
+  const currentItems = facturations.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+
   
   useEffect(() => {
     let total = parseFloat(form.prixConsultation) || 0;
@@ -443,7 +462,8 @@ const FacturationForm: React.FC = () => {
             <tbody>
 
               
-              {facturations.map(facturation => (
+            {currentItems.map(facturation => (
+                
                 <tr key={facturation._id}>
                   <td className="px-4 py-2 border border-gray-300">{facturation.facture_n}</td>
                   <td className="px-4 py-2 border border-gray-300">{new Date(facturation.date).toLocaleDateString()}</td>
@@ -461,11 +481,11 @@ const FacturationForm: React.FC = () => {
 <td className="px-4 py-2 border-b">
   <div className="flex justify-center space-x-2">
     <FaEye
-      className="text-blue-500 cursor-pointer"
+      className="text-blue-500 cursor-pointer  "
       onClick={() => handleViewFacturation(facturation._id)}
     />
     <FaEdit
-      className="text-green-500 cursor-pointer"
+      className="text-green-500 cursor-pointer "
       onClick={() => handleEditFacturation(facturation._id)}
     />
     <FaTrash
@@ -483,6 +503,21 @@ const FacturationForm: React.FC = () => {
  </tr> ))}
   </tbody>
   </table>
+
+  <div className="flex justify-center mt-6">
+  {Array.from({ length: totalPages }, (_, index) => (
+    <button
+      key={index}
+      onClick={() => handlePageChange(index + 1)}
+      className={`px-3 py-1 mx-1 ${
+        currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+      } rounded`}
+    >
+      {index + 1}
+    </button>
+  ))}
+</div>
+
     </div>
         </div>
       </div>
