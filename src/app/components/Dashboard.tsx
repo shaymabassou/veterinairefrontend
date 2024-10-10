@@ -16,6 +16,11 @@ const Dashboard: React.FC = () => {
   const [medicaments, setMedicaments] = useState([]);
   const [produitAlimentaires, setProduitAlimentaires] = useState([]);
   const [materielConsommables, setMaterielConsommables] = useState([]);
+  const [totalStaff, setTotalStaff] = useState(240); // Example static value for staff
+  const [onShiftStaff, setOnShiftStaff] = useState(135); // Example static value
+  const [totalRooms, setTotalRooms] = useState(340); // Example static value for rooms
+  const [occupiedRooms, setOccupiedRooms] = useState(168); // Example static value
+  const [totalAnimalsToday, setTotalAnimalsToday] = useState(38); // Example static value
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -79,39 +84,68 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#e6f5f2]">
+    <div className="flex min-h-screen bg-gray-100">
       <SideNavbar />
-      <main className="flex-grow p-6 ml-64">
+      <main className="flex-grow p-8 ml-64">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">Dashboard</h1>
-          <p className="text-gray-600">Aperçu des activités de votre clinique vétérinaire</p>
+        <h1 className="text-4xl font-bold text-gray-800">Tableau de Bord</h1>
+<p className="text-gray-600">Aperçu des statistiques de la clinique vétérinaire</p>
+</div>
+{error && <p className="text-red-500 mb-4">{error}</p>}
+
+{/* Section des Cartes de Statistiques */}
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div className="p-6 shadow-lg rounded-lg bg-white flex items-center justify-between">
+    <div>
+      <h2 className="text-2xl font-bold text-gray-800">Total Clients</h2>
+      <p className="text-lg font-semibold text-green-500">{clientCount}</p>
+      <p className="text-sm text-gray-600">Aujourd'hui : 1</p> {/* Exemple de valeur dynamique */}
+    </div>
+  </div>
+  <div className="p-6 shadow-lg rounded-lg bg-white flex items-center justify-between">
+    <div>
+      <h2 className="text-2xl font-bold text-gray-800">Total Personnel</h2>
+      <p className="text-lg font-semibold text-green-500">{totalStaff}</p>
+      <p className="text-sm text-gray-600">En service : {onShiftStaff}</p>
+    </div>
+  </div>
+  <div className="p-6 shadow-lg rounded-lg bg-white flex items-center justify-between">
+    <div>
+      <h2 className="text-2xl font-bold text-gray-800">Total Chambres</h2>
+      <p className="text-lg font-semibold text-green-500">{totalRooms}</p>
+      <p className="text-sm text-gray-600">Occupées : {occupiedRooms}</p>
+    </div>
+  </div>
+</div>
+
+
+        {/* Total Animals Today */}
+        {/* <div className="mb-8">
+          <div className="p-6 shadow-lg rounded-lg bg-blue-500 text-white"> */}
+            {/* <h2 className="text-2xl font-bold">Total Animals Today</h2>
+            <p className="text-4xl font-semibold">{totalAnimalsToday}</p> */}
+            {/* You can add more details here */}
+          {/* </div>
+        </div> */}
+
+        {/* Calendar and Data Distribution */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="p-6 shadow-lg rounded-lg bg-white">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Calendrier</h2>
+            <Calendar />
+          </div>
+          <div className="p-6 shadow-lg rounded-lg bg-white">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Répartition des Données</h2>
+            <div className="max-w-xs mx-auto">
+              <Doughnut data={doughnutData} />
+            </div>
+          </div>
         </div>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="p-4 shadow-lg rounded-lg bg-white text-center">
-            <h2 className="text-2xl font-semibold text-gray-800">Total Patients</h2>
-            <p className="text-4xl font-bold text-gray-800">{clientCount}</p>
-          </div>
-          <div className="p-4 shadow-lg rounded-lg bg-white text-center">
-            <h2 className="text-2xl font-semibold text-gray-800">Total Animals</h2>
-            <p className="text-4xl font-bold text-gray-800">{animalCount}</p>
-          </div>
-          <div className="p-4 shadow-lg rounded-lg bg-white text-center">
-            <h2 className="text-2xl font-semibold text-gray-800">Total Medications</h2>
-            <p className="text-4xl font-bold text-gray-800">{medicamentCount}</p>
-          </div>
-          <div className="p-4 shadow-lg rounded-lg bg-white text-center">
-            <h2 className="text-2xl font-semibold text-gray-800">Total Produit Alimentaires</h2>
-            <p className="text-4xl font-bold text-gray-800">{produitAlimentaireCount}</p>
-          </div>
-          <div className="p-4 shadow-lg rounded-lg bg-white text-center">
-            <h2 className="text-2xl font-semibold text-gray-800">Total Matériel Consommables</h2>
-            <p className="text-4xl font-bold text-gray-800">{materielConsommableCount}</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-4 shadow-lg rounded-lg bg-white">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Statistiques</h2>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="p-6 shadow-lg rounded-lg bg-white">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Statistiques des Patients</h2>
             <Bar 
               data={chartData(
                 ['Clients', 'Animaux'], 
@@ -120,8 +154,8 @@ const Dashboard: React.FC = () => {
               )} 
             />
           </div>
-          <div className="p-4 shadow-lg rounded-lg bg-white">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Stock Items</h2>
+          <div className="p-6 shadow-lg rounded-lg bg-white">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Inventaire du Stock</h2>
             <Bar 
               data={chartData(
                 ['Médicaments', 'Produit Alimentaires', 'Matériel Consommables'], 
@@ -129,18 +163,6 @@ const Dashboard: React.FC = () => {
                 ['rgba(255, 159, 64, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)']
               )} 
             />
-          </div>
-        </div>
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-4 shadow-lg rounded-lg bg-white">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Répartition</h2>
-            <div className="max-w-xs mx-auto">
-              <Doughnut data={doughnutData} />
-            </div>
-          </div>
-          <div className="p-4 shadow-lg rounded-lg bg-white">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Calendrier</h2>
-            <Calendar />
           </div>
         </div>
       </main>
